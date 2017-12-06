@@ -11,4 +11,5 @@ A stand-alone display loading a webApp. Based on [Electron](http://electron.atom
 
 ## Usage
 
-* Start the application: `npm start`
+* Start the application: `npm run dev`
+* Start the application in fullscreen: `npm start`
