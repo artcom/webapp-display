@@ -43,7 +43,7 @@ if (cliOptions.version || cliOptions.v) {
 }
 
 let fileOptions = {}
-const configFilePath = path.join(app.getAppPath(), getOption("config", "c"))
+const configFilePath = path.resolve(getOption("config", "c"))
 fileOptions = require(configFilePath) || {}
 
 function getOption(name, shorthand) {
