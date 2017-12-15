@@ -31,6 +31,11 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen) => 
     `Renderer process crashed\n${JSON.stringify(event)}\nKilled: ${JSON.stringify(killed)}`
   ))
 
+  win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
+    console.log(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
+    setTimeout(() => win.webContents.reload(), 1000)
+  })
+
   return win
 }
 
