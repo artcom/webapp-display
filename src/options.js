@@ -42,8 +42,15 @@ if (cliOptions.version || cliOptions.v) {
 }
 
 let fileOptions = {}
-const configFilePath = path.resolve(getOption("config", "c"))
-fileOptions = require(configFilePath) || {}
+const configFile = getOption("config", "c")
+if (configFile === DEFAULTS.config) {
+  try {
+    fileOptions = require(path.resolve(configFile))
+  } catch (error) { /* ignore */ }
+} else {
+  fileOptions = require(path.resolve(configFile))
+}
+
 
 function getOption(name, shorthand) {
   if (cliOptions.hasOwnProperty(kebabCase(name))) {
