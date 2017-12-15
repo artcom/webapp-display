@@ -1,4 +1,3 @@
-const { app } = require("electron")
 const kebabCase = require("lodash.kebabcase")
 const minimist = require("minimist")
 const path = require("path")
