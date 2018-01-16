@@ -51,7 +51,6 @@ if (configFile === DEFAULTS.config) {
   fileOptions = require(path.resolve(configFile))
 }
 
-
 function getOption(name, shorthand) {
   if (cliOptions.hasOwnProperty(kebabCase(name))) {
     return cliOptions[kebabCase(name)]
