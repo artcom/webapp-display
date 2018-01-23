@@ -2,7 +2,7 @@
   "name": "webapp-display",
   "private": true,
   "main": "src/main.js",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "scripts": {
     "dev": "electron .",
     "lint": "eslint src",
