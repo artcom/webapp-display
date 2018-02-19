@@ -10,6 +10,8 @@ const { CredentialsFiller, loadCredentials } = require("./credentials")
 
 let mainWindow = null
 
+electron.app.commandLine.appendSwitch("ignore-certificate-errors")
+
 electron.app.on("ready", async () => {
   console.log("Options:")
   console.log(options)
