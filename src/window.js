@@ -1,5 +1,8 @@
 const electron = require("electron")
+const pickBy = require("lodash.pickby")
 const path = require("path")
+
+const X_FRAME_OPTIONS = "x-frame-options"
 
 module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen) => {
   const display = getDisplay(displayIndex)
@@ -25,7 +28,14 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen) => 
 
   const win = new electron.BrowserWindow(options)
   win.setMenu(null)
+  setupEventHandler(win)
 
+  removeIncomingXFrameHeaders()
+
+  return win
+}
+
+function setupEventHandler(win) {
   win.on("unresponsive", () => console.log("The application has become unresponsive."))
 
   win.webContents.on("crashed", (event, killed) => console.log(
@@ -36,8 +46,18 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen) => 
     console.log(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
     setTimeout(() => win.webContents.reload(), 1000)
   })
+}
 
-  return win
+function removeIncomingXFrameHeaders() {
+  electron.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      cancel: false,
+      responseHeaders: pickBy(
+        details.responseHeaders,
+        (value, key) => key.toLowerCase() !== X_FRAME_OPTIONS
+      )
+    })
+  })
 }
 
 function getDisplay(index) {

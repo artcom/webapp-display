@@ -19,6 +19,7 @@
     "electron-debug": "^1.5.0",
     "lodash.frompairs": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
+    "lodash.pickby": "^4.6.0",
     "minimist": "^1.2.0"
   },
   "devDependencies": {
