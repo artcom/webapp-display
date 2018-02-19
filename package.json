@@ -23,7 +23,7 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "eslint": "^4.17.0",
+    "eslint": "^4.18.0",
     "eslint-config-artcom": "^0.7.0",
     "eslint-plugin-import": "^2.8.0"
   }
