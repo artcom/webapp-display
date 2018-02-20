@@ -45,6 +45,11 @@ function setupEventHandler(win) {
     console.log(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
     setTimeout(() => win.webContents.reload(), 1000)
   })
+
+  win.webContents.on("new-window", (event, url) => {
+    console.log(`Prevented opening a new browser window for url: ${url}`)
+    event.preventDefault()
+  })
 }
 
 function removeIncomingXFrameHeaders() {
