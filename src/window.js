@@ -16,7 +16,6 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen) => 
     frame: !fullscreen,
     webPreferences: {
       preload: path.join(electron.app.getAppPath(), "src", "preload.js"),
-      nodeIntegration: false,
       webSecurity: false
     }
   }
