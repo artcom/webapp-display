@@ -35,7 +35,7 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 
   async fillInput(url, { selector, value }) {
-    if (await this.focusAndClearInput(url, selector)) {
+    if (await this.focus(url, selector)) {
       this.typeWord(value)
       return true
     }
@@ -43,14 +43,23 @@ module.exports.CredentialsFiller = class CredentialsFiller {
     return false
   }
 
-  async focusAndClearInput(url, selector) {
-    return new Promise(resolve => {
-      this.webContents.executeJavaScript(
-        `${focusElement.toString()};focusElement("${url}", "${selector}");`,
-        false,
-        result => resolve(result)
-      )
+  async focus(url, selector) {
+    const center = await new Promise((resolve) => {
+      const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
+      this.webContents.executeJavaScript(cmd, false, result => resolve(result))
     })
+
+    if (center) {
+      this.webContents.sendInputEvent({
+        type: "mouseDown",
+        button: "left",
+        x: center[0],
+        y: center[1]
+      })
+      return true
+    } else {
+      return false
+    }
   }
 
   typeWord(text) {
@@ -60,23 +69,28 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 }
 
-function focusElement(url, selector, root = document) {
+function getElementCenter(url, selector, root = document, parentOffset = [0, 0]) {
   const iframes = root.getElementsByTagName("iframe")
   for (const iframe of iframes) {
+    const iframeOffset = [
+      parentOffset[0] + iframe.getBoundingClientRect().left,
+      parentOffset[1] + iframe.getBoundingClientRect().top
+    ]
+
     if (iframe.getAttribute("src") === url) {
       const element = iframe.contentDocument.querySelector(selector)
+
       if (element) {
-        element.value = ""
-        element.focus()
-        return true
+        const { left, right, top, bottom } = element.getBoundingClientRect()
+        return [(left + right) / 2 + iframeOffset[0], (top + bottom) / 2 + iframeOffset[1]]
+      } else {
+        return null
       }
     } else {
-      if (focusElement(url, selector, iframe.contentDocument)) {
-        return true
-      }
+      return getElementCenter(url, selector, iframe.contentDocument, iframeOffset)
     }
   }
-  return false
+  return null
 }
 
 module.exports.loadCredentials = async (httpBrokerUri) => {
