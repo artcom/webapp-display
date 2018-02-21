@@ -4,7 +4,7 @@ const path = require("path")
 
 const X_FRAME_OPTIONS = "x-frame-options"
 
-module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen) => {
+module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url) => {
   const display = getDisplay(displayIndex)
   const session = electron.session.fromPartition("persist:webapp-display", { cache: true })
 
@@ -27,14 +27,17 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen) => 
 
   const win = new electron.BrowserWindow(options)
   win.setMenu(null)
-  setupEventHandler(win)
+  setupEventHandler(win, url)
 
   removeIncomingXFrameHeaders()
+
+  console.log(`Loading url: ${url}`)
+  win.loadURL(url)
 
   return win
 }
 
-function setupEventHandler(win) {
+function setupEventHandler(win, url) {
   win.on("unresponsive", () => console.log("The application has become unresponsive."))
 
   win.webContents.on("crashed", (event, killed) => console.log(
@@ -43,7 +46,10 @@ function setupEventHandler(win) {
 
   win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
     console.log(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
-    setTimeout(() => win.webContents.reload(), 1000)
+
+    if (validatedUrl === url) {
+      setTimeout(() => win.webContents.reload(), 1000)
+    }
   })
 
   win.webContents.on("new-window", (event, url) => {

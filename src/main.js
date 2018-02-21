@@ -20,12 +20,10 @@ electron.app.on("ready", async () => {
   const bootstrapData = await bootstrap(options.bootstrapUrl)
   console.log(JSON.stringify(bootstrapData))
 
-  mainWindow = createWindow(options.display, options.fullscreen, options.windowedFullscreen)
-
   const url =
     `http://${options.webApp}.${bootstrapData.backendHost}?${querystring.stringify(bootstrapData)}`
-  console.log(`Loading url: ${url}`)
-  mainWindow.loadURL(url)
+
+  mainWindow = createWindow(options.display, options.fullscreen, options.windowedFullscreen, url)
   mainWindow.on("closed", () => { mainWindow = null })
 
   const credentialsData = await loadCredentials(bootstrapData.httpBrokerUri)
