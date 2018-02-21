@@ -14,6 +14,7 @@ module.exports.CredentialsFiller = class CredentialsFiller {
       async (event, status, newURL, originalURL) => {
         const credentials = this.credentialsData[originalURL]
         if (credentials) {
+          console.log(`Try to fill credentials for url: ${originalURL}`)
           await delay(200)
           if (!await this.fillCredentials(originalURL, credentials)) {
             await delay(1000)
