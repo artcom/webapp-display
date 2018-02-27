@@ -1,5 +1,5 @@
 const electron = require("electron")
-const pickBy = require("lodash.pickby")
+const omitBy = require("lodash.omitBy")
 const path = require("path")
 
 const X_FRAME_OPTIONS = "x-frame-options"
@@ -62,9 +62,9 @@ function removeIncomingXFrameHeaders() {
   electron.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
       cancel: false,
-      responseHeaders: pickBy(
+      responseHeaders: omitBy(
         details.responseHeaders,
-        (value, key) => key.toLowerCase() !== X_FRAME_OPTIONS
+        (value, key) => key.toLowerCase() === X_FRAME_OPTIONS
       )
     })
   })
