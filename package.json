@@ -15,7 +15,7 @@
     "axios": "^0.17.1",
     "delay": "^2.0.0",
     "devtron": "^1.4.0",
-    "electron": "^1.8.2",
+    "electron": "^3.0.0",
     "electron-debug": "^1.5.0",
     "lodash.frompairs": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
