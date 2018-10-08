@@ -12,6 +12,10 @@ let mainWindow = null
 
 electron.app.commandLine.appendSwitch("ignore-certificate-errors")
 
+electron.app.commandLine.appendSwitch("ignore-autoplay-restrictions")
+electron.app.commandLine.appendSwitch("no-user-gesture-required")
+electron.app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
+
 electron.app.on("ready", async () => {
   console.log("Options:")
   console.log(options)
