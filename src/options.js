@@ -54,15 +54,15 @@ if (configFile === DEFAULTS.config) {
 }
 
 function getOption(name, shorthand) {
-  if (cliOptions.hasOwnProperty(kebabCase(name))) {
+  if (Object.prototype.hasOwnProperty.call(cliOptions, kebabCase(name))) {
     return cliOptions[kebabCase(name)]
   }
 
-  if (shorthand && cliOptions.hasOwnProperty(shorthand)) {
+  if (shorthand && Object.prototype.hasOwnProperty.call(cliOptions, shorthand)) {
     return cliOptions[shorthand]
   }
 
-  if (fileOptions.hasOwnProperty(name)) {
+  if (Object.prototype.hasOwnProperty.call(fileOptions, name)) {
     return fileOptions[name]
   }
 

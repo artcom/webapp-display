@@ -52,8 +52,8 @@ function setupEventHandler(win, url) {
     }
   })
 
-  win.webContents.on("new-window", (event, url) => {
-    console.log(`Prevented opening a new browser window for url: ${url}`)
+  win.webContents.on("new-window", (event, newWindowUrl) => {
+    console.log(`Prevented opening a new browser window for url: ${newWindowUrl}`)
     event.preventDefault()
   })
 }
