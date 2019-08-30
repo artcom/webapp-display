@@ -46,7 +46,7 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 
   async focus(url, selector) {
-    const center = await new Promise((resolve) => {
+    const center = await new Promise(resolve => {
       const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
       this.webContents.executeJavaScript(cmd, false, result => resolve(result))
     })
@@ -95,7 +95,7 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
   return null
 }
 
-module.exports.loadCredentials = async (httpBrokerUri) => {
+module.exports.loadCredentials = async httpBrokerUri => {
   const { data } = await axios.post(`${httpBrokerUri}/query`, { topic: "credentials", depth: -1 })
 
   return fromPairs(data.children

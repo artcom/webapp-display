@@ -1,5 +1,5 @@
 const electron = require("electron")
-const omitBy = require("lodash.omitBy")
+const omitBy = require("lodash.omitby")
 const path = require("path")
 
 const X_FRAME_OPTIONS = "x-frame-options"
