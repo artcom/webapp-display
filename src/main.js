@@ -24,7 +24,9 @@ electron.app.on("ready", async () => {
   const bootstrapData = await bootstrap(options.bootstrapUrl)
   console.log(JSON.stringify(bootstrapData))
 
-  const url =
+  const url = options.webAppUrl !== "webAppUrl" ?
+    `${options.webAppUrl}/?${querystring.stringify(bootstrapData)}`
+    :
     `http://${options.webApp}.${bootstrapData.backendHost}/?${querystring.stringify(bootstrapData)}`
 
   mainWindow = createWindow(options.display, options.fullscreen, options.windowedFullscreen, url)

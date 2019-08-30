@@ -10,6 +10,7 @@ const DEFAULTS = {
   display: 0,
   fullscreen: false,
   webApp: "webapp",
+  webAppUrl: "webAppUrl",
   windowedFullscreen: false
 }
 
@@ -22,6 +23,7 @@ Options:
   -d --display <display>      Use a specific display device
   -f --fullscreen             Open app in fullscreen mode
   -w --web-app                The webApp to load on start
+  -u --web-app-url            The webAppUrl to load on start
   -F --windowed-fullscreen    Open app in windowed fullscreen
 
   -h --help                   Show usage information
@@ -72,5 +74,6 @@ module.exports = {
   display: getOption("display", "d"),
   fullscreen: getOption("fullscreen", "f"),
   webApp: getOption("webApp", "w"),
+  webAppUrl: getOption("webAppUrl", "u"),
   windowedFullscreen: getOption("windowedFullscreen", "F")
 }
