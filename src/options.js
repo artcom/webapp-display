@@ -9,8 +9,8 @@ const DEFAULTS = {
   config: "config.json",
   display: 0,
   fullscreen: false,
-  webApp: "webapp",
-  webAppUrl: "webAppUrl",
+  webApp: "webApp",
+  webAppUrl: null,
   windowedFullscreen: false
 }
 

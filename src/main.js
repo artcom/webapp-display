@@ -24,7 +24,7 @@ electron.app.on("ready", async () => {
   const bootstrapData = await bootstrap(options.bootstrapUrl)
   console.log(JSON.stringify(bootstrapData))
 
-  const url = options.webAppUrl !== "webAppUrl" ?
+  const url = options.webAppUrl ?
     `${options.webAppUrl}/?${querystring.stringify(bootstrapData)}`
     :
     `http://${options.webApp}.${bootstrapData.backendHost}/?${querystring.stringify(bootstrapData)}`
