@@ -13,3 +13,29 @@ A stand-alone display loading a webApp. Based on [Electron](http://electron.atom
 
 * Start the application: `npm run dev`
 * Start the application in fullscreen: `npm start`
+
+## Build
+
+### for Windows with Docker
+
+run from inside the project directory:
+
+```bash
+docker run --rm -ti \
+ --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS_TAG|TRAVIS|TRAVIS_REPO_|TRAVIS_BUILD_|TRAVIS_BRANCH|TRAVIS_PULL_REQUEST_|APPVEYOR_|CSC_|GH_|GITHUB_|BT_|AWS_|STRIP|BUILD_') \
+ --env ELECTRON_CACHE="/root/.cache/electron" \
+ --env ELECTRON_BUILDER_CACHE="/root/.cache/electron-builder" \
+ -v ${PWD}:/project \
+ -v ${PWD##*/}-node-modules:/project/node_modules \
+ -v ~/.cache/electron:/root/.cache/electron \
+ -v ~/.cache/electron-builder:/root/.cache/electron-builder \
+ electronuserland/builder:wine
+```
+
+run from inside the container 
+```
+npm i
+npm run package:win
+```
+
+build output is under buld/win-unpacked.
