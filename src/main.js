@@ -1,5 +1,6 @@
 const electron = require("electron")
 const querystring = require("querystring")
+const topping = require("mqtt-topping").default
 
 require("electron-debug")()
 
@@ -32,6 +33,12 @@ electron.app.on("ready", async () => {
   mainWindow = createWindow(options.display, options.fullscreen, options.windowedFullscreen, url)
   mainWindow.on("closed", () => { mainWindow = null })
 
+  const mqtt = topping.connect(bootstrapData.tcpBrokerUri)
+  mqtt.subscribe(`${bootstrapData.deviceTopic}/onClearCache`, () => {
+    mainWindow.webContents.session.clearCache(() => {
+      console.log("Cache cleared")
+    })
+  })
   const credentialsData = await loadCredentials(bootstrapData.httpBrokerUri)
   const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData)
   credentialsFiller.listen()
