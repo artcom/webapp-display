@@ -14,6 +14,10 @@ A stand-alone display loading a webApp. Based on [Electron](http://electron.atom
 * Start the application: `npm run dev`
 * Start the application in fullscreen: `npm start`
 
+### Clear the cache of window
+The application listens to the mqtt topic `devices/<device>/doClearCache` which triggers the cache clearing.
+The respective broker is obtained by the bootstrap data. 
+
 ## Build
 
 ### for Windows with Docker
@@ -38,4 +42,4 @@ npm i
 npm run package:win
 ```
 
-build output is under buld/win-unpacked.
+build output is under build/win-unpacked.
