@@ -34,7 +34,7 @@ electron.app.on("ready", async () => {
   mainWindow.on("closed", () => { mainWindow = null })
 
   const mqtt = topping.connect(bootstrapData.tcpBrokerUri)
-  mqtt.subscribe(`${bootstrapData.deviceTopic}/onClearCache`, () => {
+  mqtt.subscribe(`${bootstrapData.deviceTopic}/doClearCache`, () => {
     mainWindow.webContents.session.clearCache(() => {
       console.log("Cache cleared")
     })
