@@ -38,4 +38,4 @@ npm i
 npm run package:win
 ```
 
-build output is under buld/win-unpacked.
+build output is under build/win-unpacked.
