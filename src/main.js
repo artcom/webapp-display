@@ -39,9 +39,6 @@ electron.app.on("ready", async () => {
       console.log("Cache cleared")
     })
   })
-  mqtt.subscribe(`${bootstrapData.deviceTopic}/onReload`, () => {
-    mainWindow.reload()
-  })
 
   const credentialsData = await loadCredentials(bootstrapData.httpBrokerUri)
   const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData)
