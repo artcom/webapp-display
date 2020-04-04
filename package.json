@@ -34,7 +34,7 @@
     "lodash.frompairs": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
     "lodash.omitby": "^4.6.0",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "mqtt-topping": "^0.8.12"
   },
   "devDependencies": {
