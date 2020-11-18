@@ -24,10 +24,8 @@ electron.app.on("ready", async () => {
   bootstrapClient(options.bootstrapUrl, serviceId).then(
     async ({ logger, mqttClient, data }) => {
       const bootstrapData = data
-      logger.info("bootstrap", JSON.stringify(bootstrapData))
 
-      logger.info("Options:")
-      logger.info(options)
+      logger.info("Options:", options)
 
       const url = options.webAppUrl ?
         `${options.webAppUrl}/?${querystring.stringify(bootstrapData)}`
