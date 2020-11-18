@@ -2,13 +2,12 @@ const electron = require("electron")
 const querystring = require("querystring")
 
 require("electron-debug")()
-const bootstrapClient = require("@artcom/bootstrap-client")
 
-const bootstrap = require("./bootstrap")
 const options = require("./options")
 const { createWindow } = require("./window")
 const { CredentialsFiller, loadCredentials } = require("./credentials")
 
+const bootstrapClient = require("@artcom/bootstrap-client")
 const serviceId = "webappDisplay"
 
 let mainWindow = null
@@ -18,6 +17,8 @@ electron.app.commandLine.appendSwitch("ignore-certificate-errors")
 electron.app.commandLine.appendSwitch("ignore-autoplay-restrictions")
 electron.app.commandLine.appendSwitch("no-user-gesture-required")
 electron.app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
+
+electron.app.commandLine.appendSwitch("touch-events", "enabled")
 
 electron.app.on("ready", async () => {
   bootstrapClient(options.bootstrapUrl, serviceId).then(
@@ -47,8 +48,6 @@ electron.app.on("ready", async () => {
       credentialsFiller.listen()
   })
 })
-
-electron.app.commandLine.appendSwitch("touch-events", "enabled")
 
 electron.app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
