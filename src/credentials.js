@@ -3,9 +3,10 @@ const delay = require("delay")
 const fromPairs = require("lodash.frompairs")
 
 module.exports.CredentialsFiller = class CredentialsFiller {
-  constructor(webContents, credentialsData) {
+  constructor(webContents, credentialsData, logger) {
     this.webContents = webContents
     this.credentialsData = credentialsData
+    this.logger = logger
   }
 
   async listen() {
@@ -14,12 +15,12 @@ module.exports.CredentialsFiller = class CredentialsFiller {
       async (event, status, newURL, originalURL) => {
         const credentials = this.credentialsData[originalURL]
         if (credentials) {
-          console.log(`Try to fill credentials for url: ${originalURL}`)
+          this.logger(`Try to fill credentials for url: ${originalURL}`)
           await delay(200)
           if (!await this.fillCredentials(originalURL, credentials)) {
             await delay(1000)
             if (!await this.fillCredentials(originalURL, credentials)) {
-              console.log(`Could not fill credentials for url: ${originalURL}`)
+              this.logger(`Could not fill credentials for url: ${originalURL}`)
             }
           }
         }

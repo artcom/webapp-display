@@ -43,7 +43,7 @@ electron.app.on("ready", async () => {
       })
 
       const credentialsData = await loadCredentials(bootstrapData.httpBrokerUri)
-      const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData)
+      const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData, logger)
       credentialsFiller.listen()
   })
 })
