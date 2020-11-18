@@ -4,8 +4,8 @@ const path = require("path")
 
 const X_FRAME_OPTIONS = "x-frame-options"
 
-module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url) => {
-  const display = getDisplay(displayIndex)
+module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url, logger) => {
+  const display = getDisplay(displayIndex, logger)
   const session = electron.session.fromPartition("persist:webapp-display", { cache: true })
 
   const options = {
@@ -28,25 +28,25 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url
 
   const win = new electron.BrowserWindow(options)
   win.setMenu(null)
-  setupEventHandler(win, url)
+  setupEventHandler(win, url, logger)
 
   removeIncomingXFrameHeaders()
 
-  console.log(`Loading url: ${url}`)
+  logger.info(`Loading url: ${url}`)
   win.loadURL(url)
 
   return win
 }
 
-function setupEventHandler(win, url) {
-  win.on("unresponsive", () => console.log("The application has become unresponsive."))
+function setupEventHandler(win, url, logger) {
+  win.on("unresponsive", () => logger.info("The application has become unresponsive."))
 
-  win.webContents.on("crashed", (event, killed) => console.log(
+  win.webContents.on("crashed", (event, killed) => logger.info(
     `Renderer process crashed\n${JSON.stringify(event)}\nKilled: ${JSON.stringify(killed)}`
   ))
 
   win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
-    console.log(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
+    logger.info(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
 
     if (validatedUrl === url) {
       setTimeout(() => win.webContents.reload(), 1000)
@@ -54,7 +54,7 @@ function setupEventHandler(win, url) {
   })
 
   win.webContents.on("new-window", (event, newWindowUrl) => {
-    console.log(`Prevented opening a new browser window for url: ${newWindowUrl}`)
+    logger.info(`Prevented opening a new browser window for url: ${newWindowUrl}`)
     event.preventDefault()
   })
 }
@@ -71,11 +71,11 @@ function removeIncomingXFrameHeaders() {
   })
 }
 
-function getDisplay(index) {
+function getDisplay(index, logger) {
   const displays = electron.screen.getAllDisplays()
   const display = displays[index]
   if (!display) {
-    console.log(`Display must be between 0 and ${displays.length - 1} (not ${index})`)
+    logger.info(`Display must be between 0 and ${displays.length - 1} (not ${index})`)
     process.exit(1)
   }
 
