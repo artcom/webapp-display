@@ -1,6 +1,5 @@
 const electron = require("electron")
 const querystring = require("querystring")
-const topping = require("mqtt-topping").default
 
 require("electron-debug")()
 const bootstrapClient = require("@artcom/bootstrap-client")
@@ -37,8 +36,7 @@ electron.app.on("ready", async () => {
       mainWindow = createWindow(options.display, options.fullscreen, options.windowedFullscreen, url, logger)
       mainWindow.on("closed", () => { mainWindow = null })
 
-      const mqtt = topping.connect(bootstrapData.tcpBrokerUri)
-      mqtt.subscribe(`${bootstrapData.deviceTopic}/doClearCache`, () => {
+      mqttClient.subscribe(`${bootstrapData.deviceTopic}/doClearCache`, () => {
         mainWindow.webContents.session.clearCache(() => {
           logger.info("Cache cleared")
         })
