@@ -10,7 +10,6 @@ const options = require("./options")
 const { createWindow } = require("./window")
 const { CredentialsFiller, loadCredentials } = require("./credentials")
 
-const bootstrapUrl = process.env.BOOTSTRAP_SERVER_URI
 const serviceId = "webappDisplay"
 
 let mainWindow = null
@@ -22,14 +21,13 @@ electron.app.commandLine.appendSwitch("no-user-gesture-required")
 electron.app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
 
 electron.app.on("ready", async () => {
-  bootstrapClient(`${bootstrapUrl}/${serviceId}`, serviceId).then(
+  bootstrapClient(options.bootstrapUrl, serviceId).then(
     async({logger, mqttClient, data}) => {
+      const bootstrapData = data
+      logger.info("bootstrap", JSON.stringify(bootstrapData))
+
       logger.info("Options:")
       logger.info(options)
-
-      logger.info("Requesting bootstrap data...")
-      const bootstrapData = await bootstrap(options.bootstrapUrl)
-      logger.info(JSON.stringify(bootstrapData))
 
       const url = options.webAppUrl ?
         `${options.webAppUrl}/?${querystring.stringify(bootstrapData)}`
