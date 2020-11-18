@@ -3,11 +3,11 @@ const querystring = require("querystring")
 
 require("electron-debug")()
 
+const bootstrapClient = require("@artcom/bootstrap-client")
 const options = require("./options")
 const { createWindow } = require("./window")
 const { CredentialsFiller, loadCredentials } = require("./credentials")
 
-const bootstrapClient = require("@artcom/bootstrap-client")
 const serviceId = "webappDisplay"
 
 let mainWindow = null
@@ -22,7 +22,7 @@ electron.app.commandLine.appendSwitch("touch-events", "enabled")
 
 electron.app.on("ready", async () => {
   bootstrapClient(options.bootstrapUrl, serviceId).then(
-    async({logger, mqttClient, data}) => {
+    async ({ logger, mqttClient, data }) => {
       const bootstrapData = data
       logger.info("bootstrap", JSON.stringify(bootstrapData))
 
@@ -34,7 +34,14 @@ electron.app.on("ready", async () => {
         :
         `http://${options.webApp}.${bootstrapData.backendHost}/?${querystring.stringify(bootstrapData)}`
 
-      mainWindow = createWindow(options.display, options.fullscreen, options.windowedFullscreen, url, logger)
+      mainWindow = createWindow(
+        options.display,
+        options.fullscreen,
+        options.windowedFullscreen,
+        url,
+        logger
+      )
+
       mainWindow.on("closed", () => { mainWindow = null })
 
       mqttClient.subscribe(`${bootstrapData.deviceTopic}/doClearCache`, () => {
@@ -44,9 +51,13 @@ electron.app.on("ready", async () => {
       })
 
       const credentialsData = await loadCredentials(bootstrapData.httpBrokerUri)
-      const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData, logger)
+
+      const credentialsFiller = new CredentialsFiller(
+        mainWindow.webContents, credentialsData, logger
+      )
+
       credentialsFiller.listen()
-  })
+    })
 })
 
 electron.app.on("window-all-closed", () => {
