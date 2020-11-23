@@ -3,7 +3,7 @@ const querystring = require("querystring")
 
 require("electron-debug")()
 
-const bootstrapClient = require("@artcom/bootstrap-client")
+const bootstrap = require("@artcom/bootstrap-client")
 const options = require("./options")
 const { createWindow } = require("./window")
 const { CredentialsFiller, loadCredentials } = require("./credentials")
@@ -21,7 +21,7 @@ electron.app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-requir
 electron.app.commandLine.appendSwitch("touch-events", "enabled")
 
 electron.app.on("ready", async () => {
-  bootstrapClient(options.bootstrapUrl, serviceId).then(
+  bootstrap(options.bootstrapUrl, serviceId).then(
     async ({ logger, mqttClient, data }) => {
       const bootstrapData = data
 
