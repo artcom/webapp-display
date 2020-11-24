@@ -55,6 +55,16 @@ electron.app.on("ready", async () => {
       )
 
       credentialsFiller.listen()
+
+      let shuttingDown = false
+      process.on("SIGINT", () => {
+        if (!shuttingDown) {
+          shuttingDown = true
+          logger.info("Shutting down")
+          mqttClient.disconnect(true)
+          process.exit()
+        }
+      })
     })
 })
 
