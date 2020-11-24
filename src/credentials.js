@@ -96,12 +96,14 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
 }
 
 module.exports.loadCredentials = async httpBrokerUri => {
-  const { data } = await axios.post(`${httpBrokerUri}/query`, { topic: "credentials", depth: -1 })
+  try {
+    const { data } = await axios.post(`${httpBrokerUri}/query`, { topic: "credentials", depth: -1 })
 
-  return fromPairs(data.children
-    .map(({ payload }) => JSON.parse(payload))
-    .map(({ url, username, password }) => [url, { username, password }])
-  )
+    return fromPairs(data.children
+      .map(({ payload }) => JSON.parse(payload))
+      .map(({ url, username, password }) => [url, { username, password }])
+    )
+  } catch (error) { /* ignore */ }
 }
 
 function delay(time) {
