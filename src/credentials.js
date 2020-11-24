@@ -1,5 +1,4 @@
 const axios = require("axios")
-const delay = require("delay")
 const fromPairs = require("lodash.frompairs")
 
 module.exports.CredentialsFiller = class CredentialsFiller {
@@ -103,5 +102,9 @@ module.exports.loadCredentials = async httpBrokerUri => {
     .map(({ payload }) => JSON.parse(payload))
     .map(({ url, username, password }) => [url, { username, password }])
   )
+}
+
+function delay(time) {
+  return new Promise(resolve => setTimeout(resolve, time))
 }
 

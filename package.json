@@ -25,24 +25,22 @@
     }
   },
   "engines": {
-    "node": "12.11.0"
+    "node": "14.15.1"
   },
   "dependencies": {
     "@artcom/bootstrap-client": "^4.1.0",
-    "axios": "^0.19.2",
-    "delay": "^4.3.0",
-    "electron-debug": "^3.0.1",
+    "axios": "^0.21.0",
+    "electron-debug": "^3.1.0",
     "lodash.frompairs": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
     "lodash.omitby": "^4.6.0",
     "minimist": "^1.2.5"
   },
   "devDependencies": {
-    "devtron": "^1.4.0",
-    "electron": "^8.0.0",
-    "electron-builder": "^21.2.0",
-    "eslint": "^6.8.0",
-    "eslint-config-artcom": "^0.10.1",
-    "eslint-plugin-import": "^2.20.1"
+    "electron": "^11.0.3",
+    "electron-builder": "^22.9.1",
+    "eslint": "^7.14.0",
+    "eslint-config-artcom": "^0.11.0",
+    "eslint-plugin-import": "^2.22.1"
   }
 }
