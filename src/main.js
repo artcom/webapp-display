@@ -1,8 +1,6 @@
 const electron = require("electron")
 const querystring = require("querystring")
 
-require("electron-debug")()
-
 const bootstrap = require("@artcom/bootstrap-client")
 const options = require("./options")
 const { createWindow } = require("./window")
