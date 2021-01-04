@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@artcom/bootstrap-client": "^4.1.0",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "lodash.frompairs": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
     "lodash.omitby": "^4.6.0",
