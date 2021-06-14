@@ -15,14 +15,15 @@ A stand-alone display loading a webApp. Based on [Electron](http://electron.atom
 * Start the application in fullscreen: `npm start`
 
 ### Clear the cache of window
+
 The application listens to the mqtt topic `devices/<device>/doClearCache` which triggers the cache clearing.
 The respective broker is obtained by the bootstrap data. 
 
 ## Build
 
-### for Windows with Docker
+### Windows with Docker
 
-run from inside the project directory:
+Run from inside the project directory:
 
 ```bash
 docker run --rm -ti \
@@ -36,10 +37,11 @@ docker run --rm -ti \
  electronuserland/builder:wine
 ```
 
-run from inside the container 
+Run from inside the container:
+
 ```
 npm i
 npm run package:win
 ```
 
-build output is under build/win-unpacked.
+Final build output is located at `build/win-unpacked`.
