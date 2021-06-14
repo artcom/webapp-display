@@ -25,10 +25,9 @@ electron.app.on("ready", async () => {
 
       logger.info("Options:", options)
 
-      const url = options.webAppUrl ?
-        `${options.webAppUrl}/?${querystring.stringify(bootstrapData)}`
-        :
-        `http://${options.webApp}.${bootstrapData.backendHost}/?${querystring.stringify(bootstrapData)}`
+      const url = options.webAppUrl
+        ? `${options.webAppUrl}/?${querystring.stringify(bootstrapData)}`
+        : `http://${options.webApp}.${bootstrapData.backendHost}/?${querystring.stringify(bootstrapData)}`
 
       mainWindow = createWindow(
         options.display,
