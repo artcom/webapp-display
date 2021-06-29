@@ -30,14 +30,14 @@
   "dependencies": {
     "@artcom/bootstrap-client": "^4.3.0",
     "axios": "^0.21.1",
+    "electron": "^13.1.2",
+    "electron-builder": "^22.11.7",
     "lodash.frompairs": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
     "lodash.omitby": "^4.6.0",
     "minimist": "^1.2.5"
   },
   "devDependencies": {
-    "electron": "^13.1.2",
-    "electron-builder": "^22.11.7",
     "eslint": "^7.28.0",
     "eslint-config-artcom": "^0.11.0",
     "eslint-plugin-import": "^2.23.4"
