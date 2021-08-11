@@ -14,6 +14,7 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url
     x: display.bounds.x,
     y: display.bounds.y,
     frame: !fullscreen,
+    autoHideMenuBar: fullscreen,
     webPreferences: {
       webviewTag: true,
       preload: path.join(electron.app.getAppPath(), "src", "preload.js"),
