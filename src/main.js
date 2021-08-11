@@ -3,6 +3,7 @@ const querystring = require("querystring")
 
 const bootstrap = require("@artcom/bootstrap-client")
 const options = require("./options")
+const createMenu = require("./menu")
 const { createWindow } = require("./window")
 const { CredentialsFiller, loadCredentials } = require("./credentials")
 
@@ -52,6 +53,8 @@ electron.app.on("ready", async () => {
       )
 
       credentialsFiller.listen()
+
+      electron.Menu.setApplicationMenu(createMenu())
 
       let shuttingDown = false
       process.on("SIGINT", () => {
