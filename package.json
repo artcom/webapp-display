@@ -30,7 +30,7 @@
   "dependencies": {
     "@artcom/bootstrap-client": "^4.3.0",
     "axios": "^0.21.1",
-    "electron": "^13.2.2",
+    "electron": "^13.3.0",
     "electron-builder": "^22.11.7",
     "lodash.frompairs": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
