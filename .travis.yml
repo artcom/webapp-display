@@ -11,8 +11,8 @@ cache:
 script:
   - |
     docker run --rm \
-      --e ELECTRON_CACHE="/root/.cache/electron" \
-      --e ELECTRON_BUILDER_CACHE="/root/.cache/electron-builder" \
+      -e ELECTRON_CACHE="/root/.cache/electron" \
+      -e ELECTRON_BUILDER_CACHE="/root/.cache/electron-builder" \
       -v ${PWD}:/project \
       -v ${PWD}/node_modules:/project/node_modules \
       -v ${HOME}/.cache/electron:/root/.cache/electron \
