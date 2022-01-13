@@ -18,6 +18,7 @@ electron.app.commandLine.appendSwitch("no-user-gesture-required")
 electron.app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
 
 electron.app.commandLine.appendSwitch("touch-events", "enabled")
+electron.app.commandLine.appendSwitch("enable-features", "OverlayScrollbar")
 
 electron.app.on("ready", async () => {
   bootstrap(options.bootstrapUrl, serviceId).then(
