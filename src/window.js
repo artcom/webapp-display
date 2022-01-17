@@ -2,7 +2,7 @@ const electron = require("electron")
 const omitBy = require("lodash.omitby")
 const path = require("path")
 
-const X_FRAME_OPTIONS = "x-frame-options"
+const RESPONSE_HEADERS_TO_FILTER = ["x-frame-options", "content-security-policy"]
 
 module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url, logger) => {
   const display = getDisplay(displayIndex, logger)
@@ -32,7 +32,7 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url
   win.setMenu(null)
   setupEventHandler(win, url, logger)
 
-  removeIncomingXFrameHeaders()
+  filterResponseHeaders()
 
   logger.info(`Loading url: ${url}`)
   win.loadURL(url)
@@ -61,13 +61,14 @@ function setupEventHandler(win, url, logger) {
   })
 }
 
-function removeIncomingXFrameHeaders() {
+function filterResponseHeaders() {
   electron.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    console.log(details.responseHeaders)
     callback({
       cancel: false,
       responseHeaders: omitBy(
         details.responseHeaders,
-        (value, key) => key.toLowerCase() === X_FRAME_OPTIONS
+        (value, key) => RESPONSE_HEADERS_TO_FILTER.includes(key.toLowerCase())
       )
     })
   })
