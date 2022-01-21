@@ -2,8 +2,6 @@ const electron = require("electron")
 const omitBy = require("lodash.omitby")
 const path = require("path")
 
-const RESPONSE_HEADERS_TO_OMIT = ["x-frame-options", "content-security-policy"]
-
 module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url, logger) => {
   const display = getDisplay(displayIndex, logger)
   const session = electron.session.fromPartition("persist:webapp-display", { cache: true })
@@ -64,11 +62,21 @@ function setupEventHandler(win, url, logger) {
 function filterResponseHeaders() {
   electron.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
-      cancel: false,
-      responseHeaders: omitBy(
-        details.responseHeaders,
-        (value, key) => RESPONSE_HEADERS_TO_OMIT.includes(key.toLowerCase())
-      )
+      responseHeaders: {
+        "access-control-allow-origin": "*",
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        ...omitBy(
+          details.responseHeaders,
+          (value, key) => [
+            "x-frame-options",
+            "content-security-policy",
+            "access-control-allow-origin",
+            "access-control-allow-headers",
+            "access-control-allow-methods"]
+            .includes(key.toLowerCase())
+        )
+      },
     })
   })
 }
