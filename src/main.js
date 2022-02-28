@@ -19,6 +19,21 @@ electron.app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-requir
 electron.app.commandLine.appendSwitch("touch-events", "enabled")
 electron.app.commandLine.appendSwitch("enable-features", "OverlayScrollbar")
 
+electron.protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "http",
+    privileges: {
+      standard: true,
+      secure: true,
+      bypassCSP: true,
+      allowServiceWorkers: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      stream: true,
+    },
+  },
+])
+
 electron.app.on("ready", async () => {
   bootstrap(options.bootstrapUrl, serviceId).then(async ({ logger, mqttClient, data }) => {
     logger.info("Options:", options)
