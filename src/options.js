@@ -11,7 +11,7 @@ const DEFAULTS = {
   fullscreen: false,
   webApp: "webApp",
   webAppUrl: null,
-  windowedFullscreen: false
+  windowedFullscreen: false,
 }
 
 const USAGE = `
@@ -48,7 +48,9 @@ const configFile = getOption("config", "c")
 if (configFile === DEFAULTS.config) {
   try {
     fileOptions = require(path.resolve(configFile))
-  } catch (error) { /* ignore */ }
+  } catch (error) {
+    /* ignore */
+  }
 } else {
   fileOptions = require(path.resolve(configFile))
 }
@@ -75,5 +77,5 @@ module.exports = {
   fullscreen: getOption("fullscreen", "f"),
   webApp: getOption("webApp", "w"),
   webAppUrl: getOption("webAppUrl", "u"),
-  windowedFullscreen: getOption("windowedFullscreen", "F")
+  windowedFullscreen: getOption("windowedFullscreen", "F"),
 }

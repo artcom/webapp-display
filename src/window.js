@@ -17,8 +17,8 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url
       webviewTag: true,
       preload: path.join(electron.app.getAppPath(), "src", "preload.js"),
       webSecurity: false,
-      contextIsolation: false
-    }
+      contextIsolation: false,
+    },
   }
 
   if (windowedFullscreen) {
@@ -41,9 +41,11 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url
 function setupEventHandler(win, url, logger) {
   win.on("unresponsive", () => logger.info("The application has become unresponsive."))
 
-  win.webContents.on("crashed", (event, killed) => logger.info(
-    `Renderer process crashed\n${JSON.stringify(event)}\nKilled: ${JSON.stringify(killed)}`
-  ))
+  win.webContents.on("crashed", (event, killed) =>
+    logger.info(
+      `Renderer process crashed\n${JSON.stringify(event)}\nKilled: ${JSON.stringify(killed)}`
+    )
+  )
 
   win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
     logger.info(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
@@ -66,16 +68,15 @@ function filterResponseHeaders() {
         "access-control-allow-origin": "*",
         "access-control-allow-headers": "*",
         "access-control-allow-methods": "*",
-        ...omitBy(
-          details.responseHeaders,
-          (value, key) => [
+        ...omitBy(details.responseHeaders, (value, key) =>
+          [
             "x-frame-options",
             "content-security-policy",
             "access-control-allow-origin",
             "access-control-allow-headers",
-            "access-control-allow-methods"]
-            .includes(key.toLowerCase())
-        )
+            "access-control-allow-methods",
+          ].includes(key.toLowerCase())
+        ),
       },
     })
   })

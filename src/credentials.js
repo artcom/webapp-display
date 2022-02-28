@@ -9,22 +9,19 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 
   async listen() {
-    this.webContents.on(
-      "did-get-response-details",
-      async (event, status, newURL, originalURL) => {
-        const credentials = this.credentialsData[originalURL]
-        if (credentials) {
-          this.logger(`Try to fill credentials for url: ${originalURL}`)
-          await delay(200)
-          if (!await this.fillCredentials(originalURL, credentials)) {
-            await delay(1000)
-            if (!await this.fillCredentials(originalURL, credentials)) {
-              this.logger(`Could not fill credentials for url: ${originalURL}`)
-            }
+    this.webContents.on("did-get-response-details", async (event, status, newURL, originalURL) => {
+      const credentials = this.credentialsData[originalURL]
+      if (credentials) {
+        this.logger(`Try to fill credentials for url: ${originalURL}`)
+        await delay(200)
+        if (!(await this.fillCredentials(originalURL, credentials))) {
+          await delay(1000)
+          if (!(await this.fillCredentials(originalURL, credentials))) {
+            this.logger(`Could not fill credentials for url: ${originalURL}`)
           }
         }
       }
-    )
+    })
   }
 
   async fillCredentials(url, { password, username }) {
@@ -46,9 +43,9 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 
   async focus(url, selector) {
-    const center = await new Promise(resolve => {
+    const center = await new Promise((resolve) => {
       const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
-      this.webContents.executeJavaScript(cmd, false, result => resolve(result))
+      this.webContents.executeJavaScript(cmd, false, (result) => resolve(result))
     })
 
     if (center) {
@@ -56,7 +53,7 @@ module.exports.CredentialsFiller = class CredentialsFiller {
         type: "mouseDown",
         button: "left",
         x: center[0],
-        y: center[1]
+        y: center[1],
       })
       return true
     } else {
@@ -76,7 +73,7 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
   for (const iframe of iframes) {
     const iframeOffset = [
       parentOffset[0] + iframe.getBoundingClientRect().left,
-      parentOffset[1] + iframe.getBoundingClientRect().top
+      parentOffset[1] + iframe.getBoundingClientRect().top,
     ]
 
     if (iframe.getAttribute("src") === url) {
@@ -95,18 +92,20 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
   return null
 }
 
-module.exports.loadCredentials = async httpBrokerUri => {
+module.exports.loadCredentials = async (httpBrokerUri) => {
   try {
     const { data } = await axios.post(`${httpBrokerUri}/query`, { topic: "credentials", depth: -1 })
 
-    return fromPairs(data.children
-      .map(({ payload }) => JSON.parse(payload))
-      .map(({ url, username, password }) => [url, { username, password }])
+    return fromPairs(
+      data.children
+        .map(({ payload }) => JSON.parse(payload))
+        .map(({ url, username, password }) => [url, { username, password }])
     )
-  } catch (error) { /* ignore */ }
+  } catch (error) {
+    /* ignore */
+  }
 }
 
 function delay(time) {
-  return new Promise(resolve => setTimeout(resolve, time))
+  return new Promise((resolve) => setTimeout(resolve, time))
 }
-

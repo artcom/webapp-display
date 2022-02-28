@@ -1,7 +1,10 @@
 {
-  "extends": "artcom",
-  "rules": {
-    "no-console": 0,
-    "import/no-commonjs": 0
+  "root": true,
+  "plugins": ["import"],
+  "extends": ["eslint:recommended", "plugin:import/recommended", "prettier"],
+  "env": {
+    "es2020": true,
+    "browser": true,
+    "node": true
   }
 }

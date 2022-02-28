@@ -1,5 +1,4 @@
 const electron = require("electron")
-const querystring = require("querystring")
 
 const bootstrap = require("@artcom/bootstrap-client")
 const options = require("./options")
@@ -21,52 +20,50 @@ electron.app.commandLine.appendSwitch("touch-events", "enabled")
 electron.app.commandLine.appendSwitch("enable-features", "OverlayScrollbar")
 
 electron.app.on("ready", async () => {
-  bootstrap(options.bootstrapUrl, serviceId).then(
-    async ({ logger, mqttClient, data }) => {
-      const bootstrapData = data
+  bootstrap(options.bootstrapUrl, serviceId).then(async ({ logger, mqttClient, data }) => {
+    logger.info("Options:", options)
 
-      logger.info("Options:", options)
+    const params = new URLSearchParams(data).toString()
+    const url = options.webAppUrl
+      ? `${options.webAppUrl}/?${params}`
+      : `http://${options.webApp}.${data.backendHost}/?${params}`
 
-      const url = options.webAppUrl
-        ? `${options.webAppUrl}/?${querystring.stringify(bootstrapData)}`
-        : `http://${options.webApp}.${bootstrapData.backendHost}/?${querystring.stringify(bootstrapData)}`
+    mainWindow = createWindow(
+      options.display,
+      options.fullscreen,
+      options.windowedFullscreen,
+      url,
+      logger
+    )
 
-      mainWindow = createWindow(
-        options.display,
-        options.fullscreen,
-        options.windowedFullscreen,
-        url,
-        logger
-      )
+    mainWindow.on("closed", () => {
+      mainWindow = null
+    })
 
-      mainWindow.on("closed", () => { mainWindow = null })
-
-      mqttClient.subscribe(`${bootstrapData.deviceTopic}/doClearCache`, () => {
-        mainWindow.webContents.session.clearCache(() => {
-          logger.info("Cache cleared")
-        })
-      })
-
-      const credentialsData = await loadCredentials(bootstrapData.httpBrokerUri)
-
-      const credentialsFiller = new CredentialsFiller(
-        mainWindow.webContents, credentialsData, logger
-      )
-
-      credentialsFiller.listen()
-
-      electron.Menu.setApplicationMenu(createMenu())
-
-      let shuttingDown = false
-      process.on("SIGINT", () => {
-        if (!shuttingDown) {
-          shuttingDown = true
-          logger.info("Shutting down")
-          mqttClient.disconnect(true)
-          process.exit()
-        }
+    mqttClient.subscribe(`${data.deviceTopic}/doClearCache`, () => {
+      mainWindow.webContents.session.clearCache(() => {
+        logger.info("Cache cleared")
       })
     })
+
+    const credentialsData = await loadCredentials(data.httpBrokerUri)
+
+    const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData, logger)
+
+    credentialsFiller.listen()
+
+    electron.Menu.setApplicationMenu(createMenu())
+
+    let shuttingDown = false
+    process.on("SIGINT", () => {
+      if (!shuttingDown) {
+        shuttingDown = true
+        logger.info("Shutting down")
+        mqttClient.disconnect(true)
+        process.exit()
+      }
+    })
+  })
 })
 
 electron.app.on("window-all-closed", () => {

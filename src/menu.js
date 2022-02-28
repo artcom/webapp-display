@@ -6,47 +6,47 @@ module.exports = function createMenu() {
       label: app.getName(),
       submenu: [
         {
-          role: "about"
+          role: "about",
         },
         {
-          type: "separator"
+          type: "separator",
         },
         {
           role: "services",
-          submenu: []
+          submenu: [],
         },
         {
-          type: "separator"
+          type: "separator",
         },
         {
-          role: "hide"
+          role: "hide",
         },
         {
-          role: "hideothers"
+          role: "hideothers",
         },
         {
-          role: "unhide"
+          role: "unhide",
         },
         {
-          type: "separator"
+          type: "separator",
         },
         {
           label: "Copy",
           accelerator: process.platform === "darwin" ? "Cmd+C" : "Ctrl+C",
-          selector: "copy:"
+          selector: "copy:",
         },
         {
           label: "Paste",
           accelerator: process.platform === "darwin" ? "Cmd+V" : "Ctrl+V",
-          selector: "paste:"
+          selector: "paste:",
         },
         {
-          type: "separator"
+          type: "separator",
         },
         {
-          role: "quit"
-        }
-      ]
+          role: "quit",
+        },
+      ],
     },
     {
       label: "View",
@@ -54,10 +54,12 @@ module.exports = function createMenu() {
         {
           label: "Show GPU Flags",
           accelerator: "CommandOrControl+G",
-          click(item, window) { window.loadURL("chrome://gpu") }
+          click(item, window) {
+            window.loadURL("chrome://gpu")
+          },
         },
         {
-          type: "separator"
+          type: "separator",
         },
         {
           label: "Reload",
@@ -66,7 +68,7 @@ module.exports = function createMenu() {
             if (window) {
               window.reload()
             }
-          }
+          },
         },
         {
           label: "Toggle Developer Tools",
@@ -75,10 +77,10 @@ module.exports = function createMenu() {
             if (window) {
               window.webContents.toggleDevTools()
             }
-          }
-        }
-      ]
-    }
+          },
+        },
+      ],
+    },
   ]
 
   return Menu.buildFromTemplate(template)
