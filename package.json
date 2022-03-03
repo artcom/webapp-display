@@ -54,7 +54,7 @@
     "electron": "^17.1.0",
     "electron-builder": "^22.14.13",
     "eslint": "^8.10.0",
-    "eslint-config-prettier": "^8.4.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.25.4"
   }
 }
