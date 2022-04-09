@@ -47,7 +47,7 @@
     "lodash.frompairs": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
     "lodash.omitby": "^4.6.0",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "prettier": "^2.5.1"
   },
   "devDependencies": {
