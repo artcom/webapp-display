@@ -1,7 +1,7 @@
 const electron = require("electron")
 
 const bootstrap = require("@artcom/bootstrap-client")
-const options = require("./options")
+const optionsList = require("./options")
 const createMenu = require("./menu")
 const { createWindow } = require("./window")
 const { CredentialsFiller, loadCredentials } = require("./credentials")
@@ -35,39 +35,37 @@ electron.protocol.registerSchemesAsPrivileged([
 ])
 
 electron.app.on("ready", async () => {
-  bootstrap(options.bootstrapUrl, serviceId).then(async ({ logger, mqttClient, data }) => {
+  optionsList.forEach(async (options) => {
+    const { logger, mqttClient, data } = await bootstrap(options.bootstrapUrl, serviceId)
     logger.info("Options:", options)
 
     const params = new URLSearchParams(data).toString()
-    const url = options.webAppUrl
-      ? `${options.webAppUrl}/?${params}`
-      : `http://${options.webApp}.${data.backendHost}/?${params}`
+    const url = `${options.webAppUrl}/?${params}`
+    const display = getDisplay(options.display, logger)
 
-    mainWindow = createWindow(
-      options.display,
-      options.fullscreen,
-      options.windowedFullscreen,
+    const window = createWindow(
       url,
+      {
+        x: options.geometry.x + display.bounds.x,
+        y: options.geometry.y + display.bounds.y,
+        width: options.geometry.width,
+        height: options.geometry.height,
+      },
+      options.fullscreen,
       logger
     )
 
-    mainWindow.on("closed", () => {
-      mainWindow = null
-    })
-
     mqttClient.subscribe(`${data.deviceTopic}/doClearCache`, () => {
-      mainWindow.webContents.session.clearCache(() => {
+      window.webContents.session.clearCache(() => {
         logger.info("Cache cleared")
       })
     })
 
-    const credentialsData = await loadCredentials(data.httpBrokerUri)
-
-    const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData, logger)
-
-    credentialsFiller.listen()
-
     electron.Menu.setApplicationMenu(createMenu())
+
+    const credentialsData = await loadCredentials(data.httpBrokerUri)
+    const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData, logger)
+    credentialsFiller.listen()
 
     let shuttingDown = false
     process.on("SIGINT", () => {
@@ -86,3 +84,14 @@ electron.app.on("window-all-closed", () => {
     electron.app.quit()
   }
 })
+
+function getDisplay(index, logger) {
+  const displays = electron.screen.getAllDisplays()
+  const display = displays[index]
+  if (!display) {
+    logger.info(`Display must be between 0 and ${displays.length - 1} (not ${index})`)
+    process.exit(1)
+  }
+
+  return display
+}

@@ -8,8 +8,8 @@ const DEFAULTS = {
   bootstrapUrl: "http://bootstrap-server/device",
   config: "config.json",
   display: 0,
+  geometry: { x: 0, y: 0, width: 800, height: 600 },
   fullscreen: false,
-  webApp: "webApp",
   webAppUrl: null,
   windowedFullscreen: false,
 }
@@ -22,7 +22,6 @@ Options:
   -c --config                 Use a specific config file
   -d --display <display>      Use a specific display device
   -f --fullscreen             Open app in fullscreen mode
-  -w --web-app                The webApp to load on start
   -u --web-app-url            The webAppUrl to load on start
   -F --windowed-fullscreen    Open app in windowed fullscreen
 
@@ -32,6 +31,7 @@ Options:
 
 const skippedArgs = process.argv[0].includes("electron") ? 2 : 1
 const cliOptions = minimist(process.argv.slice(skippedArgs))
+console.log("~ cliOptions", cliOptions)
 
 if (cliOptions.help || cliOptions.h) {
   console.log(USAGE.trim())
@@ -43,7 +43,7 @@ if (cliOptions.version || cliOptions.v) {
   process.exit()
 }
 
-let fileOptions = {}
+let fileOptions
 const configFile = getOption("config", "c")
 if (configFile === DEFAULTS.config) {
   try {
@@ -55,7 +55,7 @@ if (configFile === DEFAULTS.config) {
   fileOptions = require(path.resolve(configFile))
 }
 
-function getOption(name, shorthand) {
+function getOption(name, shorthand, fileOptionsItem) {
   if (Object.prototype.hasOwnProperty.call(cliOptions, kebabCase(name))) {
     return cliOptions[kebabCase(name)]
   }
@@ -64,18 +64,25 @@ function getOption(name, shorthand) {
     return cliOptions[shorthand]
   }
 
-  if (Object.prototype.hasOwnProperty.call(fileOptions, name)) {
-    return fileOptions[name]
+  if (Object.prototype.hasOwnProperty.call(fileOptionsItem, name)) {
+    return fileOptionsItem[name]
   }
 
   return DEFAULTS[name]
 }
 
-module.exports = {
-  bootstrapUrl: getOption("bootstrapUrl", "b"),
-  display: getOption("display", "d"),
-  fullscreen: getOption("fullscreen", "f"),
-  webApp: getOption("webApp", "w"),
-  webAppUrl: getOption("webAppUrl", "u"),
-  windowedFullscreen: getOption("windowedFullscreen", "F"),
+function getOptions(fileOptionsItem) {
+  return {
+    bootstrapUrl: getOption("bootstrapUrl", "b", fileOptionsItem),
+    display: getOption("display", "d", fileOptionsItem),
+    geometry: getOption("geometry", "d", fileOptionsItem),
+    fullscreen: getOption("fullscreen", "f", fileOptionsItem),
+    webApp: getOption("webApp", "w", fileOptionsItem),
+    webAppUrl: getOption("webAppUrl", "u", fileOptionsItem),
+    windowedFullscreen: getOption("windowedFullscreen", "F", fileOptionsItem),
+  }
 }
+
+fileOptions = Array.isArray(fileOptions) ? fileOptions : [fileOptions]
+
+module.exports = fileOptions.map((fileOptionsItem) => getOptions(fileOptionsItem))

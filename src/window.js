@@ -2,16 +2,19 @@ const electron = require("electron")
 const omitBy = require("lodash.omitby")
 const path = require("path")
 
-module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url, logger) => {
-  const display = getDisplay(displayIndex, logger)
+module.exports.createWindow = (url, geometry, fullscreen, logger) => {
   const session = electron.session.fromPartition("persist:webapp-display", { cache: true })
+  const { x = 0, y = 0, width = 800, height = 600 } = geometry
 
   const options = {
     fullscreen,
     session,
-    x: display.bounds.x,
-    y: display.bounds.y,
-    frame: !fullscreen,
+    x,
+    y,
+    width,
+    height,
+    frame: false,
+    roundedCorners: false,
     autoHideMenuBar: fullscreen,
     webPreferences: {
       webviewTag: true,
@@ -19,11 +22,6 @@ module.exports.createWindow = (displayIndex, fullscreen, windowedFullscreen, url
       webSecurity: false,
       contextIsolation: false,
     },
-  }
-
-  if (windowedFullscreen) {
-    options.width = display.workAreaSize.width
-    options.height = display.workAreaSize.height
   }
 
   const win = new electron.BrowserWindow(options)
@@ -80,15 +78,4 @@ function filterResponseHeaders() {
       },
     })
   })
-}
-
-function getDisplay(index, logger) {
-  const displays = electron.screen.getAllDisplays()
-  const display = displays[index]
-  if (!display) {
-    logger.info(`Display must be between 0 and ${displays.length - 1} (not ${index})`)
-    process.exit(1)
-  }
-
-  return display
 }
