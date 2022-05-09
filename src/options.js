@@ -11,7 +11,6 @@ const DEFAULTS = {
   geometry: { x: 0, y: 0, width: 800, height: 600 },
   fullscreen: false,
   webAppUrl: null,
-  windowedFullscreen: false,
 }
 
 const USAGE = `
@@ -23,7 +22,6 @@ Options:
   -d --display <display>      Use a specific display device
   -f --fullscreen             Open app in fullscreen mode
   -u --web-app-url            The webAppUrl to load on start
-  -F --windowed-fullscreen    Open app in windowed fullscreen
 
   -h --help                   Show usage information
   -v --version                Show version information

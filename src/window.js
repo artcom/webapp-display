@@ -13,7 +13,7 @@ module.exports.createWindow = (url, geometry, fullscreen, logger) => {
     y,
     width,
     height,
-    frame: false,
+    frame: !fullscreen,
     roundedCorners: false,
     autoHideMenuBar: fullscreen,
     webPreferences: {
