@@ -4,20 +4,20 @@ A stand-alone display loading a webApp. Based on [Electron](http://electron.atom
 
 ## Setup
 
-* Install [Node.js](http://nodejs.org)
-* Install dependencies: `npm install`
-* Configure device:
-  * Create a `config.json` which contains the `bootstrapUrl` and `webApp` option or provide them via command line (see `npm start -- -h`)
+- Install [Node.js](http://nodejs.org)
+- Install dependencies: `npm install`
+- Configure device:
+  - Create a `config.json` which contains the `bootstrapUrl` and `webAppUrl` option or provide them via command line (see `npm start -- -h`)
 
 ## Usage
 
-* Start the application: `npm run dev`
-* Start the application in fullscreen: `npm start`
+- Start the application: `npm run dev`
+- Start the application in fullscreen: `npm start`
 
 ### Clear the cache of window
 
 The application listens to the mqtt topic `devices/<device>/doClearCache` which triggers the cache clearing.
-The respective broker is obtained by the bootstrap data. 
+The respective broker is obtained by the bootstrap data.
 
 ## Build
 

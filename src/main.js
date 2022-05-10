@@ -1,14 +1,12 @@
 const electron = require("electron")
 
 const bootstrap = require("@artcom/bootstrap-client")
-const optionsList = require("./options")
+const config = require("./options")
 const createMenu = require("./menu")
 const { createWindow } = require("./window")
 const { CredentialsFiller, loadCredentials } = require("./credentials")
 
-const serviceId = "webappDisplay"
-
-let mainWindow = null
+const SERVICE_ID = "webappDisplay"
 
 electron.app.commandLine.appendSwitch("ignore-certificate-errors")
 
@@ -35,47 +33,55 @@ electron.protocol.registerSchemesAsPrivileged([
 ])
 
 electron.app.on("ready", async () => {
-  optionsList.forEach(async (options) => {
-    const { logger, mqttClient, data } = await bootstrap(options.bootstrapUrl, serviceId)
-    logger.info("Options:", options)
+  const { logger, mqttClient, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
-    const params = new URLSearchParams(data).toString()
-    const url = `${options.webAppUrl}/?${params}`
-    const display = getDisplay(options.display, logger)
+  config.windows.forEach(
+    async ({ deviceSuffix, webAppUrl, geometry, fullscreen, displayIndex }) => {
+      const deviceTopic = concatSuffix(data.deviceTopic, deviceSuffix)
+      const device = concatSuffix(data.device, deviceSuffix)
+      const windowData = { ...data, deviceTopic, device }
+      console.log("~ windowData", windowData)
 
-    const window = createWindow(
-      url,
-      {
-        x: options.geometry.x + display.bounds.x,
-        y: options.geometry.y + display.bounds.y,
-        width: options.geometry.width,
-        height: options.geometry.height,
-      },
-      options.fullscreen,
-      logger
-    )
+      logger.info("Options:", config)
 
-    mqttClient.subscribe(`${data.deviceTopic}/doClearCache`, () => {
-      window.webContents.session.clearCache(() => {
-        logger.info("Cache cleared")
+      const params = new URLSearchParams(windowData).toString()
+      const url = `${webAppUrl}/?${params}`
+      const display = getDisplay(displayIndex, logger)
+
+      const window = createWindow(
+        url,
+        {
+          x: geometry.x + display.bounds.x,
+          y: geometry.y + display.bounds.y,
+          width: geometry.width,
+          height: geometry.height,
+        },
+        fullscreen,
+        logger
+      )
+
+      mqttClient.subscribe(`${deviceTopic}/doClearCache`, () => {
+        window.webContents.session.clearCache(() => {
+          logger.info("Cache cleared")
+        })
       })
-    })
 
-    electron.Menu.setApplicationMenu(createMenu())
+      electron.Menu.setApplicationMenu(createMenu())
 
-    const credentialsData = await loadCredentials(data.httpBrokerUri)
-    const credentialsFiller = new CredentialsFiller(mainWindow.webContents, credentialsData, logger)
-    credentialsFiller.listen()
+      const credentialsData = await loadCredentials(data.httpBrokerUri)
+      const credentialsFiller = new CredentialsFiller(window.webContents, credentialsData, logger)
+      credentialsFiller.listen()
+    }
+  )
 
-    let shuttingDown = false
-    process.on("SIGINT", () => {
-      if (!shuttingDown) {
-        shuttingDown = true
-        logger.info("Shutting down")
-        mqttClient.disconnect(true)
-        process.exit()
-      }
-    })
+  let shuttingDown = false
+  process.on("SIGINT", () => {
+    if (!shuttingDown) {
+      shuttingDown = true
+      logger.info("Shutting down")
+      mqttClient.disconnect(true)
+      process.exit()
+    }
   })
 })
 
@@ -94,4 +100,8 @@ function getDisplay(index, logger) {
   }
 
   return display
+}
+
+function concatSuffix(base, suffix, divider = "-") {
+  return suffix ? `${base}${divider}${suffix}` : base
 }
