@@ -14,7 +14,7 @@ module.exports.createWindow = (url, geometry, fullscreen, logger) => {
     width,
     height,
     frame: !fullscreen,
-    roundedCorners: false,
+    roundedCorners: fullscreen,
     autoHideMenuBar: fullscreen,
     webPreferences: {
       webviewTag: true,
