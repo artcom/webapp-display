@@ -41,8 +41,8 @@ if (cliOptions.version || cliOptions.v) {
   process.exit()
 }
 
-let fileOptions
-const configFile = getOption("config", "c")
+let fileOptions = {}
+const configFile = getOption("config", "c", {})
 if (configFile === DEFAULTS.config) {
   try {
     fileOptions = require(path.resolve(configFile))
