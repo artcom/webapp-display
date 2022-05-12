@@ -3,13 +3,11 @@ const path = require("path")
 
 const packageJson = require("../package.json")
 
-const DEFAULT_CONFIG_FILE = "config.json"
-const DEFAULT_BOOTSTRAP_URL = "http://bootstrap-server/device"
+const DEFAULT_CONFIG_FILE = "./config.json"
 const DEFAULT_WINDOW_CONFIG = {
   displayIndex: 0,
   geometry: { x: 0, y: 0, width: 800, height: 600 },
   fullscreen: false,
-  webAppUrl: null,
   deviceSuffix: null,
 }
 
@@ -38,14 +36,16 @@ if (cliOptions.version || cliOptions.v) {
 
 const configFile = cliOptions.configFile || cliOptions.c || DEFAULT_CONFIG_FILE
 
-let windowConfigs = {}
+let config = {}
 try {
-  windowConfigs = require(path.resolve(configFile))
+  config = require(path.resolve(configFile))
 } catch (error) {
   throw new Error(`Missing config file: ${configFile}`)
 }
 
 module.exports = {
-  bootstrapUrl: windowConfigs.bootstrapUrl || DEFAULT_BOOTSTRAP_URL,
-  windows: windowConfigs.windows.map((config) => ({ ...DEFAULT_WINDOW_CONFIG, ...config })),
+  bootstrapUrl: config.bootstrapUrl,
+  windows: config.windows
+    ? config.windows.map((windowConfig) => ({ ...DEFAULT_WINDOW_CONFIG, ...windowConfig }))
+    : [{ ...DEFAULT_WINDOW_CONFIG, ...config }],
 }
