@@ -25,23 +25,22 @@ The webapp-display supports a `single window` and a `multi window` configuration
 
 ### Multi Window
 
-When using multiple windows each window should get an `deviceSuffix`. This suffix will be appended to the device name from the bootstrap server using `-` as a separator. This result in a unique `device` and `deviceTopic` for each window (e.g. `bootstrapUrl="http://example.com/device-P1"` and `deviceSuffix="Left"` result in `device="device-P1-Left"` and `deviceTopic="devices/device-P1-Left"`).
+When using multiple windows each window should get a `deviceSuffix`. This suffix will be appended to the device name from the bootstrap server using `-` as a separator. This results in a unique `device` and `deviceTopic` for each window (e.g. `bootstrapUrl="http://example.com/device-P1"` and `deviceSuffix="Left"` result in `device="device-P1-Left"` and `deviceTopic="devices/device-P1-Left"`).
 
 - Make a copy of `config.json.multiWindowTemplate` and rename it to `config.json`
 - it contains these options
   - `bootstrapUrl`
-  - `windows` it contains all `single window` options plus:
-    - `deviceSuffix` optional, default: null
+  - `windows` it contains all options of `single window` plus:
+    - `deviceSuffix` optional, default: `null`
 
 ## Usage
 
 - Start the application: `npm run dev`
 - Start the application in fullscreen: `npm start`
 
-### Clear the cache of window
+### Clear the cache of a window via MQTT
 
-The application listens to the mqtt topic `devices/<device>/doClearCache` which triggers the cache clearing.
-The respective broker is obtained by the bootstrap data.
+The MQTT client of each window listens for the mqtt topic `devices/<device>/doClearCache`, which triggers the clearing of the cache of that window.
 
 ## Build
 
