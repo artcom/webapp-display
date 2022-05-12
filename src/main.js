@@ -37,8 +37,8 @@ electron.app.on("ready", async () => {
 
   config.windows.forEach(
     async ({ deviceSuffix, webAppUrl, geometry, fullscreen, displayIndex }) => {
-      const deviceTopic = concatSuffix(data.deviceTopic, deviceSuffix)
-      const device = concatSuffix(data.device, deviceSuffix)
+      const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
+      const device = appendSuffix(data.device, deviceSuffix)
       const windowData = { ...data, deviceTopic, device }
 
       logger.info("Options:", config)
@@ -101,6 +101,6 @@ function getDisplay(index, logger) {
   return display
 }
 
-function concatSuffix(base, suffix, divider = "-") {
-  return suffix ? `${base}${divider}${suffix}` : base
+function appendSuffix(baseName, suffix, divider = "-") {
+  return suffix ? `${baseName}${divider}${suffix}` : baseName
 }
