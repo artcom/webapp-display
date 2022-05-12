@@ -1,0 +1,12 @@
+{
+  "bootstrapUrl": "http://bootstrap-server/device",
+  "webAppUrl": "http://example.com",
+  "displayIndex": 0,
+  "geometry": {
+    "x": 0,
+    "y": 0,
+    "width": 800,
+    "height": 600
+  },
+  "fullscreen": false
+}
