@@ -40,7 +40,6 @@ electron.app.on("ready", async () => {
       const deviceTopic = concatSuffix(data.deviceTopic, deviceSuffix)
       const device = concatSuffix(data.device, deviceSuffix)
       const windowData = { ...data, deviceTopic, device }
-      console.log("~ windowData", windowData)
 
       logger.info("Options:", config)
 
