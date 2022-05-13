@@ -13,8 +13,8 @@ module.exports.createWindow = (id, url, bounds, displayId, logger) => {
     session,
     x: windowBounds.x + display.bounds.x,
     y: windowBounds.y + display.bounds.y,
-    width: windowBounds.width,
-    height: windowBounds.height,
+    width: windowBounds.width, // ignored in fullscreen
+    height: windowBounds.height, // ignored in fullscreen
     frame: !isfullscreen,
     roundedCorners: isfullscreen,
     autoHideMenuBar: isfullscreen,
