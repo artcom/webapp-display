@@ -2,9 +2,11 @@ const electron = require("electron")
 const omitBy = require("lodash.omitby")
 const path = require("path")
 
-module.exports.createWindow = (id, url, bounds, displayId, logger) => {
-  const session = electron.session.fromPartition(`persist:webapp-display-${id}`, { cache: true })
-  const isfullscreen = !bounds
+module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
+  const session = electron.session.fromPartition(`persist:webapp-display-${sessionId}`, {
+    cache: true,
+  })
+  const isfullscreen = bounds === null
   const windowBounds = bounds || { x: 0, y: 0, width: 800, height: 600 }
   const display = getDisplay(displayId)
 
