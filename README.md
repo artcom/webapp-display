@@ -40,7 +40,7 @@ When using multiple windows each window should get a `deviceSuffix`. This suffix
 
 ### Clear the cache of a window via MQTT
 
-The MQTT client of each window listens for the mqtt topic `devices/<device>/doClearCache`, which triggers the clearing of the cache of that window.
+The MQTT client of each window listens for the mqtt topic `devices/<device>/doClearCache`, which triggers the clearing of the cache of the entire app (all windows).Since the cache is cleared at the disk level, there may still be cached files in memory. Therefore, a restart of the application is required to reload the previously cached files.
 
 ## Build
 
