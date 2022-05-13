@@ -16,7 +16,6 @@ module.exports.createWindow = (id, url, bounds, displayId, logger) => {
     width: windowBounds.width, // ignored in fullscreen
     height: windowBounds.height, // ignored in fullscreen
     frame: !isfullscreen,
-    roundedCorners: isfullscreen,
     autoHideMenuBar: isfullscreen,
     webPreferences: {
       webviewTag: true,
