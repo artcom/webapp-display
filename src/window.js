@@ -39,10 +39,8 @@ module.exports.createWindow = (url, geometry, fullscreen, logger) => {
 function setupEventHandler(win, url, logger) {
   win.on("unresponsive", () => logger.info("The application has become unresponsive."))
 
-  win.webContents.on("crashed", (event, killed) =>
-    logger.info(
-      `Renderer process crashed\n${JSON.stringify(event)}\nKilled: ${JSON.stringify(killed)}`
-    )
+  win.webContents.on("render-process-gone", (event, details) =>
+    logger.info(`Render process gone, reason: ${details.reason}`)
   )
 
   win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
@@ -53,9 +51,9 @@ function setupEventHandler(win, url, logger) {
     }
   })
 
-  win.webContents.on("new-window", (event, newWindowUrl) => {
-    logger.info(`Prevented opening a new browser window for url: ${newWindowUrl}`)
-    event.preventDefault()
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    logger.info(`Prevented opening a new browser window for url: ${url}`)
+    return { action: "deny" }
   })
 }
 
