@@ -48,6 +48,7 @@ electron.app.on("ready", async () => {
       const display = getDisplay(displayIndex, logger)
 
       const window = createWindow(
+        device,
         url,
         {
           x: geometry.x + display.bounds.x,

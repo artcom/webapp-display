@@ -2,8 +2,8 @@ const electron = require("electron")
 const omitBy = require("lodash.omitby")
 const path = require("path")
 
-module.exports.createWindow = (url, geometry, fullscreen, logger) => {
-  const session = electron.session.fromPartition("persist:webapp-display", { cache: true })
+module.exports.createWindow = (id, url, geometry, fullscreen, logger) => {
+  const session = electron.session.fromPartition(`persist:webapp-display-${id}`, { cache: true })
   const { x = 0, y = 0, width = 800, height = 600 } = geometry
 
   const options = {
