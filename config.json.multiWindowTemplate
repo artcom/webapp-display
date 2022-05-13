@@ -5,19 +5,17 @@
       "webAppUrl": "http://example.com",
       "displayIndex": 0,
       "deviceSuffix": "Left",
-      "fullscreen": false
     },
     {
       "webAppUrl": "http://example.com",
       "displayIndex": 1,
       "deviceSuffix": "Right",
-      "geometry": {
+      "bounds": {
         "x": 200,
         "y": 200,
         "width": 400,
         "height": 400
       },
-      "fullscreen": false
     }
   ]
 }

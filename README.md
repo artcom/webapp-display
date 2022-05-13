@@ -20,8 +20,7 @@ The webapp-display supports a `single window` and a `multi window` configuration
   - `bootstrapUrl`
   - `webAppUrl`
   - `displayIndex` optional, default: `0`
-  - `fullscreen` optional, default: `true`
-  - `geometry` optional, if not fullscreen, default: `{ x: 0, y: 0, width: 800, height: 600 }`
+  - `bounds` optional, if not set the window mode will be fullscreen, bounds format: `{ x: 0, y: 0, width: 800, height: 600 }`
 
 ### Multi Window
 

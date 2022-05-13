@@ -35,44 +35,30 @@ electron.protocol.registerSchemesAsPrivileged([
 electron.app.on("ready", async () => {
   const { logger, mqttClient, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
-  config.windows.forEach(
-    async ({ deviceSuffix, webAppUrl, geometry, fullscreen, displayIndex }) => {
-      const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
-      const device = appendSuffix(data.device, deviceSuffix)
-      const windowData = { ...data, deviceTopic, device }
+  config.windows.forEach(async ({ deviceSuffix, webAppUrl, bounds, displayIndex }) => {
+    const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
+    const device = appendSuffix(data.device, deviceSuffix)
+    const windowData = { ...data, deviceTopic, device }
 
-      logger.info("Options:", config)
+    logger.info("Options:", config)
 
-      const params = new URLSearchParams(windowData).toString()
-      const url = `${webAppUrl}/?${params}`
-      const display = getDisplay(displayIndex, logger)
+    const params = new URLSearchParams(windowData).toString()
+    const url = `${webAppUrl}/?${params}`
 
-      const window = createWindow(
-        device,
-        url,
-        {
-          x: geometry.x + display.bounds.x,
-          y: geometry.y + display.bounds.y,
-          width: geometry.width,
-          height: geometry.height,
-        },
-        fullscreen,
-        logger
-      )
+    const window = createWindow(device, url, bounds, displayIndex, logger)
 
-      mqttClient.subscribe(`${deviceTopic}/doClearCache`, () => {
-        window.webContents.session.clearCache().then(() => {
-          logger.info("Cache cleared")
-        })
+    mqttClient.subscribe(`${deviceTopic}/doClearCache`, () => {
+      window.webContents.session.clearCache().then(() => {
+        logger.info("Cache cleared")
       })
+    })
 
-      electron.Menu.setApplicationMenu(createMenu())
+    electron.Menu.setApplicationMenu(createMenu())
 
-      const credentialsData = await loadCredentials(data.httpBrokerUri)
-      const credentialsFiller = new CredentialsFiller(window.webContents, credentialsData, logger)
-      credentialsFiller.listen()
-    }
-  )
+    const credentialsData = await loadCredentials(data.httpBrokerUri)
+    const credentialsFiller = new CredentialsFiller(window.webContents, credentialsData, logger)
+    credentialsFiller.listen()
+  })
 
   let shuttingDown = false
   process.on("SIGINT", () => {
@@ -90,17 +76,6 @@ electron.app.on("window-all-closed", () => {
     electron.app.quit()
   }
 })
-
-function getDisplay(index, logger) {
-  const displays = electron.screen.getAllDisplays()
-  const display = displays[index]
-  if (!display) {
-    logger.info(`Display must be between 0 and ${displays.length - 1} (not ${index})`)
-    process.exit(1)
-  }
-
-  return display
-}
 
 function appendSuffix(baseName, suffix, divider = "-") {
   return suffix ? `${baseName}${divider}${suffix}` : baseName

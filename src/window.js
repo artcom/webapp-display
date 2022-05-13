@@ -2,20 +2,22 @@ const electron = require("electron")
 const omitBy = require("lodash.omitby")
 const path = require("path")
 
-module.exports.createWindow = (id, url, geometry, fullscreen, logger) => {
+module.exports.createWindow = (id, url, bounds, displayId, logger) => {
   const session = electron.session.fromPartition(`persist:webapp-display-${id}`, { cache: true })
-  const { x = 0, y = 0, width = 800, height = 600 } = geometry
+  const isfullscreen = !bounds
+  const windowBounds = bounds || { x: 0, y: 0, width: 800, height: 600 }
+  const display = getDisplay(displayId)
 
   const options = {
-    fullscreen,
+    fullscreen: isfullscreen,
     session,
-    x,
-    y,
-    width,
-    height,
-    frame: !fullscreen,
-    roundedCorners: fullscreen,
-    autoHideMenuBar: fullscreen,
+    x: windowBounds.x + display.bounds.x,
+    y: windowBounds.y + display.bounds.y,
+    width: windowBounds.width,
+    height: windowBounds.height,
+    frame: !isfullscreen,
+    roundedCorners: isfullscreen,
+    autoHideMenuBar: isfullscreen,
     webPreferences: {
       webviewTag: true,
       preload: path.join(electron.app.getAppPath(), "src", "preload.js"),
@@ -76,4 +78,15 @@ function filterResponseHeaders() {
       },
     })
   })
+}
+
+function getDisplay(index, logger) {
+  const displays = electron.screen.getAllDisplays()
+  const display = displays[index]
+  if (!display) {
+    logger.info(`Display must be between 0 and ${displays.length - 1} (not ${index})`)
+    process.exit(1)
+  }
+
+  return display
 }

@@ -6,8 +6,7 @@ const packageJson = require("../package.json")
 const DEFAULT_CONFIG_FILE = "./config.json"
 const DEFAULT_WINDOW_CONFIG = {
   displayIndex: 0,
-  geometry: { x: 0, y: 0, width: 800, height: 600 },
-  fullscreen: false,
+  bounds: null,
   deviceSuffix: null,
 }
 
