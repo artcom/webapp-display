@@ -39,7 +39,7 @@
     }
   },
   "engines": {
-    "node": "16.14.0"
+    "node": "16.15.0"
   },
   "dependencies": {
     "@artcom/bootstrap-client": "^4.6.0",
@@ -51,10 +51,10 @@
     "prettier": "^2.5.1"
   },
   "devDependencies": {
-    "electron": "^17.1.0",
-    "electron-builder": "^22.14.13",
-    "eslint": "^8.10.0",
+    "electron": "^18.2.3",
+    "electron-builder": "^23.0.3",
+    "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.25.4"
+    "eslint-plugin-import": "^2.26.0"
   }
 }
