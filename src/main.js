@@ -60,7 +60,7 @@ electron.app.on("ready", async () => {
       )
 
       mqttClient.subscribe(`${deviceTopic}/doClearCache`, () => {
-        window.webContents.session.clearCache(() => {
+        window.webContents.session.clearCache().then(() => {
           logger.info("Cache cleared")
         })
       })
