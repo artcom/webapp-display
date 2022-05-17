@@ -7,7 +7,7 @@ module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
     cache: true,
   })
   const isfullscreen = bounds === null
-  const windowBounds = bounds || { x: 0, y: 0, width: 800, height: 600 }
+  const windowBounds = { x: 0, y: 0, width: 800, height: 600, ...bounds }
   const display = getDisplay(displayId)
 
   const options = {
