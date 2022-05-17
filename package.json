@@ -10,8 +10,7 @@
     "package": "electron-builder build --win --mac --linux",
     "format": "prettier --write src",
     "lint": "eslint src",
-    "dev": "electron .",
-    "start": "electron . --fullscreen"
+    "start": "electron ."
   },
   "build": {
     "appId": "webapp-player",
