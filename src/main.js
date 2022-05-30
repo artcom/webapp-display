@@ -36,16 +36,20 @@ electron.app.on("ready", async () => {
   const { logger, mqttClient, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
   config.windows.forEach(async ({ deviceSuffix, webAppUrl, bounds, displayIndex }) => {
-    const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
-    const device = appendSuffix(data.device, deviceSuffix)
-    const windowData = { ...data, deviceTopic, device }
-
     logger.info("Options:", config)
 
-    const params = new URLSearchParams(windowData).toString()
-    const url = `${webAppUrl}/?${params}`
+    const device = appendSuffix(data.device, deviceSuffix)
+    const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
 
-    const window = createWindow(device, url, bounds, displayIndex, logger)
+    const webAppUrlObj = new URL(webAppUrl)
+    appendParamIfNotPresent(webAppUrlObj.searchParams, "device", device)
+    appendParamIfNotPresent(webAppUrlObj.searchParams, "deviceTopic", deviceTopic)
+
+    Object.entries(data).forEach(([key, value]) =>
+      appendParamIfNotPresent(webAppUrlObj.searchParams, key, value)
+    )
+
+    const window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
 
     mqttClient.subscribe(`${deviceTopic}/doClearCache`, () => {
       window.webContents.session.clearCache().then(() => {
@@ -79,4 +83,10 @@ electron.app.on("window-all-closed", () => {
 
 function appendSuffix(baseName, suffix, divider = "-") {
   return suffix ? `${baseName}${divider}${suffix}` : baseName
+}
+
+function appendParamIfNotPresent(searchParams, key, value) {
+  if (!searchParams.has(key)) {
+    searchParams.append(key, value)
+  }
 }
