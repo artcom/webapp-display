@@ -67,3 +67,13 @@ npm run package:win
 ```
 
 Final build output is located at `build/win-unpacked`.
+
+## Performance Improvements
+
+This is a list of some command line arguments (Chromium flags) that can have a positive impact on the app's performance.
+
+```
+--force-gpu-rasterization
+--enable-native-gpu-memory-buffers
+--enable-zero-copy
+```
