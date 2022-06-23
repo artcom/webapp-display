@@ -15,7 +15,7 @@ const USAGE = `
 
   Options:
     -c --configFile             Use a specific config file, default: ${DEFAULT_CONFIG_FILE}
-
+    -i --inlineConfig           Use the given parameter as JSON config
     -h --help                   Show usage information
     -v --version                Show version information
 `
@@ -33,13 +33,17 @@ if (cliOptions.version || cliOptions.v) {
   process.exit()
 }
 
-const configFile = cliOptions.configFile || cliOptions.c || DEFAULT_CONFIG_FILE
+let config = null
+if (cliOptions.inlineConfig || cliOptions.i) {
+  config = JSON.parse(cliOptions.inlineConfig || cliOptions.i)
+} else {
+  const configFile = cliOptions.configFile || cliOptions.c || DEFAULT_CONFIG_FILE
 
-let config = {}
-try {
-  config = require(path.resolve(configFile))
-} catch (error) {
-  throw new Error(`Missing config file: ${configFile}`)
+  try {
+    config = require(path.resolve(configFile))
+  } catch (error) {
+    throw new Error(`Missing config file: ${configFile}`)
+  }
 }
 
 module.exports = {
