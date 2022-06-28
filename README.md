@@ -66,6 +66,14 @@ npm i
 npm run package:win
 ```
 
+OS X
+
+```
+npm i
+npm run package:mac
+open -n -a "webapp-display.app" --args -c path/to/config.json
+```
+
 Final build output is located at `build/win-unpacked`.
 
 ## Performance Improvements
