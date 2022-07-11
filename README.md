@@ -66,7 +66,7 @@ npm i
 npm run package:win
 ```
 
-OS X
+### Install on OS X
 
 ```
 npm i
