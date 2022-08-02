@@ -51,9 +51,11 @@ electron.app.on("ready", async () => {
 
     const window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
 
-    mqttClient.subscribe(`${deviceTopic}/doClearCache`, () => {
+    mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
       window.webContents.session.clearCache().then(() => {
-        logger.info("Cache cleared")
+        logger.info("Cache cleared, Restarting...")
+        electron.app.relaunch()
+        electron.app.exit()
       })
     })
 
