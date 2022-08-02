@@ -37,13 +37,9 @@ When using multiple windows each window should get a `deviceSuffix`. This suffix
 - Start the application: `npm run dev`
 - Start the application in fullscreen: `npm start`
 
-### MQTT API
+### Clear Cache via MQTT API
 
-| topic                             | description                                             |
-| --------------------------------- | ------------------------------------------------------- |
-| `devices/<device>/doClearCache`   | Clears the disk cache (requires restart to take effect) |
-| `devices/<device>/doRestart`      | Restarts the app                                        |
-| `devices/<device>/doCleanRestart` | Clears the disk cache and restarts the app              |
+The app subscribes to the topic `devices/<device>/doClearCacheAndRestart`. Messages on this topic cause the disk cache to be cleared and the app to be restarted. The restart is necessary so that the memory cache is also discarded in addition to the deleted disk cache.
 
 ## Build
 
