@@ -2,8 +2,8 @@
 
 set -eo pipefail
 
-declare -a platforms=("win" "mac" "linux")
-declare -a build_dirs=("build/win-unpacked" "build/mac/webapp-display.app" "build/linux-unpacked")
+declare -a platforms=("win" "mac" "linux" "linux-armv7l" "linux-arm64")
+declare -a build_dirs=("build/win-unpacked" "build/mac/webapp-display.app" "build/linux-unpacked" "build/linux-armv7l-unpacked" "build/linux-arm64-unpacked")
 PROJECT_DIR=$PWD
 ARTIFACTS_DIR="${PROJECT_DIR}/artifacts"
 mkdir "${ARTIFACTS_DIR}"

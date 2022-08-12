@@ -7,7 +7,7 @@
     "package:win": "electron-builder build --win",
     "package:mac": "electron-builder build --mac",
     "package:linux": "electron-builder build --linux",
-    "package": "electron-builder build --win --mac --linux",
+    "package": "electron-builder build --win --mac --linux tar.gz:armv7l tar.gz:arm64 tar.gz:x64",
     "format": "prettier --write src",
     "lint": "eslint src",
     "start": "electron ."
