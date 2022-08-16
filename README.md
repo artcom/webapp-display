@@ -34,8 +34,7 @@ When using multiple windows each window should get a `deviceSuffix`. This suffix
 
 ## Usage
 
-- Start the application: `npm run dev`
-- Start the application in fullscreen: `npm start`
+- Start the application with `npm start`
 
 ### Clear Cache via MQTT API
 
