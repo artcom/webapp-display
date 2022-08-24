@@ -38,7 +38,7 @@ When using multiple windows each window should get a `deviceSuffix`. This suffix
 
 ### Clear Cache via MQTT API
 
-The app subscribes to the topic `devices/<device>/doClearCacheAndRestart`. Messages on this topic cause the disk cache to be cleared and the app to be restarted. The restart is necessary so that the memory cache is also discarded in addition to the deleted disk cache.
+The app subscribes to the topic `devices/<device>/doClearCacheAndRestart`. Messages on this topic cause the disk cache to be cleared and the app window to be restarted. The restart is necessary so that the memory cache is also discarded in addition to the deleted disk cache.
 
 ## Build
 

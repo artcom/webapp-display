@@ -49,21 +49,19 @@ electron.app.on("ready", async () => {
       appendParamIfNotPresent(webAppUrlObj.searchParams, key, value)
     )
 
-    const window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
-
-    mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
-      window.webContents.session.clearCache().then(() => {
-        logger.info("Cache cleared, Restarting...")
-        electron.app.relaunch()
-        electron.app.exit()
-      })
-    })
+    let window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
 
     electron.Menu.setApplicationMenu(createMenu())
+    await createCredentialsFiller(data, window, logger)
 
-    const credentialsData = await loadCredentials(data.httpBrokerUri)
-    const credentialsFiller = new CredentialsFiller(window.webContents, credentialsData, logger)
-    credentialsFiller.listen()
+    mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
+      window.webContents.session.clearCache().then(async () => {
+        logger.info("Cache cleared, Restarting...")
+        window.close()
+        window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
+        await createCredentialsFiller(data, window, logger)
+      })
+    })
   })
 
   let shuttingDown = false
@@ -82,6 +80,12 @@ electron.app.on("window-all-closed", () => {
     electron.app.quit()
   }
 })
+
+async function createCredentialsFiller(data, window, logger) {
+  const credentialsData = await loadCredentials(data.httpBrokerUri)
+  const credentialsFiller = new CredentialsFiller(window.webContents, credentialsData, logger)
+  credentialsFiller.listen()
+}
 
 function appendSuffix(baseName, suffix, divider = "-") {
   return suffix ? `${baseName}${divider}${suffix}` : baseName
