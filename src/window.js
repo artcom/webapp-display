@@ -6,20 +6,22 @@ module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
   const session = electron.session.fromPartition(`persist:webapp-display-${sessionId}`, {
     cache: true,
   })
-  const isfullscreen = bounds === null
+  const isFullscreen = bounds === null
   const windowBounds = { x: 0, y: 0, width: 800, height: 600, ...bounds }
   const display = getDisplay(displayId, logger)
-
-  const options = {
-    fullscreen: isfullscreen,
-    session,
-    x: windowBounds.x + display.bounds.x,
-    y: windowBounds.y + display.bounds.y,
-    width: windowBounds.width, // ignored in fullscreen
-    height: windowBounds.height, // ignored in fullscreen
+  const windowedOptions = {
+    width: windowBounds.width,
+    height: windowBounds.height,
     frame: false,
     transparent: true,
     autoHideMenuBar: true,
+  }
+
+  const options = {
+    fullscreen: isFullscreen,
+    session,
+    x: windowBounds.x + display.bounds.x,
+    y: windowBounds.y + display.bounds.y,
     webPreferences: {
       webviewTag: true,
       preload: path.join(electron.app.getAppPath(), "src", "preload.js"),
@@ -28,7 +30,10 @@ module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
     },
   }
 
-  const win = new electron.BrowserWindow(options)
+  const win = new electron.BrowserWindow(
+    isFullscreen ? options : { ...options, ...windowedOptions }
+  )
+
   win.setMenu(null)
   setupEventHandler(win, url, logger)
 
