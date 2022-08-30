@@ -9,7 +9,7 @@ services:
     # - $HOME/.cache/electron-builder
 
 script:
-  - docker run --rm node:16 npm --version
+  - docker run --rm electronuserland/builder:16-wine-05.22 npm --version
 if: tag IS present
 
 deploy:
