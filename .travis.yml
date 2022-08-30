@@ -17,7 +17,7 @@ script:
       -v $HOME/.cache/electron:/root/.cache/electron \
       -v $HOME/.cache/electron-builder:/root/.cache/electron-builder \
       -v $PWD:/project \
-      electronuserland/builder:16-wine-05.22 /bin/bash -c "whoami && ls -la /root/.cache/electron && npm install && npm run package"
+      electronuserland/builder:16-wine-05.22 /bin/bash -c "chown -R root:root /root/.cache && ls -la /root/.cache/electron && npm install && npm run package"
   - sudo chown -R travis:travis build
   - ./scripts/package.sh
 if: tag IS present
