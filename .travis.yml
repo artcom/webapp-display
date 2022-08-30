@@ -12,7 +12,7 @@ script:
   - |
     docker run --rm \
       -v $PWD:/project \
-      electronuserland/builder:16-wine /bin/bash -c "node --version && which npm && npm --version && npm install --dry-run"
+      electronuserland/builder:16-wine /bin/bash -c "node --version && which npm && /usr/local/bin/npm --version && npm install --dry-run"
   - sudo chown -R travis:travis build
   - ./scripts/package.sh
 if: tag IS present
