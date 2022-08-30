@@ -11,10 +11,8 @@ services:
 script:
   - |
     docker run --rm \
-      -e ELECTRON_CACHE="/root/.cache/electron" \
-      -e ELECTRON_BUILDER_CACHE="/root/.cache/electron-builder" \
       -v $PWD:/project \
-      electronuserland/builder:16-wine /bin/bash -c "npm install && npm run package"
+      electronuserland/builder:16-wine /bin/bash -c "node --version && npm --version && npm install --dry-run"
   - sudo chown -R travis:travis build
   - ./scripts/package.sh
 if: tag IS present
