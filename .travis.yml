@@ -9,12 +9,7 @@ services:
     # - $HOME/.cache/electron-builder
 
 script:
-  - |
-    docker run --rm \
-      -v $PWD:/project \
-      electronuserland/builder:16-wine /bin/bash -c "node --version && which npm && /usr/local/bin/npm --version && npm install --dry-run"
-  - sudo chown -R travis:travis build
-  - ./scripts/package.sh
+  - docker run --rm node:16 npm --version
 if: tag IS present
 
 deploy:
