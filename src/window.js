@@ -14,7 +14,6 @@ module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
     height: windowBounds.height,
     frame: false,
     transparent: true,
-    autoHideMenuBar: true,
   }
 
   const options = {
@@ -22,6 +21,7 @@ module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
     session,
     x: windowBounds.x + display.bounds.x,
     y: windowBounds.y + display.bounds.y,
+    autoHideMenuBar: true,
     webPreferences: {
       webviewTag: true,
       preload: path.join(electron.app.getAppPath(), "src", "preload.js"),
