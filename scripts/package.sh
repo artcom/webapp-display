@@ -1,6 +1,7 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -eo pipefail
+
+apt update && apt install -y zip
 
 declare -a platforms=("win" "mac" "linux" "linux-armv7l" "linux-arm64")
 declare -a build_dirs=("build/win-unpacked" "build/mac/webapp-display.app" "build/linux-unpacked" "build/linux-armv7l-unpacked" "build/linux-arm64-unpacked")
@@ -13,8 +14,8 @@ for (( i=0; i<${#platforms[@]}; i++ ));
 do
   echo "Packaging for ${platforms[$i]} platform"
   cd "${build_dirs[$i]}"
-  echo {\"branch\": \"$TRAVIS_BRANCH\", \"commit\": \"$TRAVIS_COMMIT\", \"build\": $TRAVIS_BUILD_NUMBER} > build.json
-  zip -r -9 "${ARTIFACTS_DIR}/webapp-display-${platforms[$i]}-${TRAVIS_BRANCH}.zip" *
-  tar czvf "${ARTIFACTS_DIR}/webapp-display-${platforms[$i]}-${TRAVIS_BRANCH}.tar.gz" *
+  echo {\"version\": \"$COMMIT_TAG\", \"commit\": \"$COMMIT_HASH\", \"buildJob\": $CI_JOB_ID} > build.json
+  zip -r -9 $ARTIFACTS_DIR/${REPOSITORY/$OWNER\//}-${platforms[$i]}-$COMMIT_TAG.zip *
+  tar czvf $ARTIFACTS_DIR/${REPOSITORY/$OWNER\//}-${platforms[$i]}-$COMMIT_TAG.tar.gz *
   cd $PROJECT_DIR
 done
