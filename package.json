@@ -51,8 +51,8 @@
     "prettier": "^2.5.1"
   },
   "devDependencies": {
-    "electron": "^18.2.3",
-    "electron-builder": "^23.0.3",
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0"
