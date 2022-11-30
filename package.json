@@ -24,7 +24,8 @@
     "win": {
       "target": [
         "dir"
-      ]
+      ],
+      "signAndEditExecutable": false
     },
     "mac": {
       "target": [
