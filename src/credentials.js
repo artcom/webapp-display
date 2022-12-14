@@ -75,7 +75,7 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
       parentOffset[1] + iframe.getBoundingClientRect().top,
     ]
 
-    if (iframe.getAttribute("src") === url) {
+    if (iframe.getAttribute("src").includes(url)) {
       const element = iframe.contentDocument.querySelector(selector)
 
       if (element) {
