@@ -9,7 +9,16 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 
   async listen() {
+    this.webContents.on("did-start-navigation", async (event, baseUrl) => {
+      const url = baseUrl.split("?")[0]
+
+      const credentials = this.credentialsData[url]
       if (credentials) {
+        console.log(`Try to fill credentials for url: ${url}`)
+        await delay(1000)
+        if (!(await this.fillCredentials(url, credentials))) {
+          if (!(await this.fillCredentials(url, credentials))) {
+            console.log(`Could not fill credentials for url: ${url}`)
           }
         }
       }
