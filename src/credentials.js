@@ -9,15 +9,7 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 
   async listen() {
-    this.webContents.on("did-get-response-details", async (event, status, newURL, originalURL) => {
-      const credentials = this.credentialsData[originalURL]
       if (credentials) {
-        this.logger(`Try to fill credentials for url: ${originalURL}`)
-        await delay(200)
-        if (!(await this.fillCredentials(originalURL, credentials))) {
-          await delay(1000)
-          if (!(await this.fillCredentials(originalURL, credentials))) {
-            this.logger(`Could not fill credentials for url: ${originalURL}`)
           }
         }
       }
