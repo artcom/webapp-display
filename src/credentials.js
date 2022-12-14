@@ -43,10 +43,8 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 
   async focus(url, selector) {
-    const center = await new Promise((resolve) => {
-      const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
-      this.webContents.executeJavaScript(cmd, false, (result) => resolve(result))
-    })
+    const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
+    const center = await this.webContents.executeJavaScript(cmd, false)
 
     if (center) {
       this.webContents.sendInputEvent({
