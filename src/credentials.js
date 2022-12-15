@@ -14,12 +14,12 @@ module.exports.CredentialsFiller = class CredentialsFiller {
       const credentials = this.credentialsData[host]
 
       if (credentials) {
-        console.log(`Try to fill credentials for host: ${host}`)
+        this.logger.info(`Try to fill credentials for host: ${host}`)
         await delay(200)
         if (!(await this.fillCredentials(host, credentials))) {
           await delay(1000)
           if (!(await this.fillCredentials(host, credentials))) {
-            console.log(`Could not fill credentials for host: ${host}`)
+            this.logger.info(`Could not fill credentials for host: ${host}`)
           }
         }
       }
