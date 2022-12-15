@@ -9,10 +9,10 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 
   async listen() {
-      const url = baseUrl.split("?")[0]
-
     this.webContents.on("did-frame-navigate", async (event, baseUrl) => {
+      const url = new URL(baseUrl).host
       const credentials = this.credentialsData[url]
+
       if (credentials) {
         console.log(`Try to fill credentials for url: ${url}`)
         await delay(1500)
@@ -75,7 +75,9 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
       parentOffset[1] + iframe.getBoundingClientRect().top,
     ]
 
-    if (iframe.getAttribute("src").includes(url)) {
+    const iframeUrl = new URL(iframe.getAttribute("src")).host
+
+    if (iframeUrl === url) {
       const element = iframe.contentDocument.querySelector(selector)
 
       if (element) {
