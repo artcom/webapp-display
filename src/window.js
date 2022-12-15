@@ -70,11 +70,17 @@ function filterResponseHeaders() {
   electron.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
+        "access-control-allow-origin": "*",
+        "access-control-allow-headers": "*",
         "access-control-allow-methods": "*",
         ...omitBy(details.responseHeaders, (value, key) =>
-          ["x-frame-options", "content-security-policy", "access-control-allow-methods"].includes(
-            key.toLowerCase()
-          )
+          [
+            "x-frame-options",
+            "content-security-policy",
+            "access-control-allow-origin",
+            "access-control-allow-headers",
+            "access-control-allow-methods",
+          ].includes(key.toLowerCase())
         ),
       },
     })
