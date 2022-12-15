@@ -10,33 +10,33 @@ module.exports.CredentialsFiller = class CredentialsFiller {
 
   async listen() {
     this.webContents.on("did-frame-navigate", async (event, baseUrl) => {
-      const host = new URL(baseUrl).host
-      const credentials = this.credentialsData[host]
+      const hostname = new URL(baseUrl).hostname
+      const credentials = this.credentialsData[hostname]
 
       if (credentials) {
-        this.logger.info(`Try to fill credentials for host: ${host}`)
+        this.logger.info(`Try to fill credentials for hostname: ${hostname}`)
         await delay(200)
-        if (!(await this.fillCredentials(host, credentials))) {
+        if (!(await this.fillCredentials(hostname, credentials))) {
           await delay(1000)
-          if (!(await this.fillCredentials(host, credentials))) {
-            this.logger.info(`Could not fill credentials for host: ${host}`)
+          if (!(await this.fillCredentials(hostname, credentials))) {
+            this.logger.info(`Could not fill credentials for hostname: ${hostname}`)
           }
         }
       }
     })
   }
 
-  async fillCredentials(host, { password, username }) {
-    if (await this.fillInput(host, username)) {
+  async fillCredentials(hostname, { password, username }) {
+    if (await this.fillInput(hostname, username)) {
       await delay(100) // wait due to async input event processing
-      return await this.fillInput(host, password)
+      return await this.fillInput(hostname, password)
     }
 
     return false
   }
 
-  async fillInput(host, { selector, value }) {
-    if (await this.focus(host, selector)) {
+  async fillInput(hostname, { selector, value }) {
+    if (await this.focus(hostname, selector)) {
       this.typeWord(value)
       return true
     }
@@ -44,8 +44,8 @@ module.exports.CredentialsFiller = class CredentialsFiller {
     return false
   }
 
-  async focus(host, selector) {
-    const cmd = `${getElementCenter.toString()};getElementCenter("${host}", "${selector}");`
+  async focus(hostname, selector) {
+    const cmd = `${getElementCenter.toString()};getElementCenter("${hostname}", "${selector}");`
     const center = await this.webContents.executeJavaScript(cmd, false)
 
     if (center) {
@@ -68,7 +68,7 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 }
 
-function getElementCenter(host, selector, root = document, parentOffset = [0, 0]) {
+function getElementCenter(hostname, selector, root = document, parentOffset = [0, 0]) {
   const iframes = root.getElementsByTagName("iframe")
   for (const iframe of iframes) {
     const iframeOffset = [
@@ -76,9 +76,9 @@ function getElementCenter(host, selector, root = document, parentOffset = [0, 0]
       parentOffset[1] + iframe.getBoundingClientRect().top,
     ]
 
-    const iframeHost = new URL(iframe.getAttribute("src")).host
+    const iframeHostname = new URL(iframe.getAttribute("src")).hostname
 
-    if (iframeHost === host) {
+    if (iframeHostname === hostname) {
       const element = iframe.contentDocument.querySelector(selector)
 
       if (element) {
@@ -88,7 +88,7 @@ function getElementCenter(host, selector, root = document, parentOffset = [0, 0]
         return null
       }
     } else {
-      return getElementCenter(host, selector, iframe.contentDocument, iframeOffset)
+      return getElementCenter(hostname, selector, iframe.contentDocument, iframeOffset)
     }
   }
   return null
@@ -101,7 +101,7 @@ module.exports.loadCredentials = async (httpBrokerUri) => {
     return fromPairs(
       data.children
         .map(({ payload }) => JSON.parse(payload))
-        .map(({ host, username, password }) => [host, { username, password }])
+        .map(({ hostname, username, password }) => [hostname, { username, password }])
     )
   } catch (error) {
     /* ignore */
