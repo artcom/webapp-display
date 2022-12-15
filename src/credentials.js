@@ -15,8 +15,9 @@ module.exports.CredentialsFiller = class CredentialsFiller {
 
       if (credentials) {
         console.log(`Try to fill credentials for url: ${url}`)
-        await delay(1500)
+        await delay(200)
         if (!(await this.fillCredentials(url, credentials))) {
+          await delay(1000)
           if (!(await this.fillCredentials(url, credentials))) {
             console.log(`Could not fill credentials for url: ${url}`)
           }
