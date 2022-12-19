@@ -12,44 +12,36 @@ module.exports.CredentialsFiller = class CredentialsFiller {
 
   async listen() {
     session.defaultSession.webRequest.onCompleted(async (details) => {
-      //console.log(details)
-      var url = details.url
-
-      const hostname = new URL(url).hostname
+      const url = details.url.split("?")[0]
       console.log(url)
 
-      const credentials = this.credentialsData[hostname]
+      const credentials = this.credentialsData[url]
 
-      if (credentials && this.previousHostname !== hostname) {
-        this.previousHostname = hostname
-        this.logger.info(`Try to fill credentials for hostname: ${hostname}`)
+      if (credentials) {
+        this.previousHostname = url
+        this.logger.info(`Try to fill credentials for url: ${url}`)
         await delay(500)
-        if (!(await this.fillCredentials(hostname, credentials))) {
+        if (!(await this.fillCredentials(url, credentials))) {
           await delay(1000)
-          if (!(await this.fillCredentials(hostname, credentials))) {
-            this.logger.info(`Could not fill credentials for hostname: ${hostname}`)
+          if (!(await this.fillCredentials(url, credentials))) {
+            this.logger.info(`Could not fill credentials for url: ${url}`)
           }
         }
       }
     })
-
-    this.webContents.on("will-navigate", async () => {
-      console.log("clear")
-      this.previousHostname = null
-    })
   }
 
-  async fillCredentials(hostname, { password, username }) {
-    if (await this.fillInput(hostname, username)) {
+  async fillCredentials(url, { password, username }) {
+    if (await this.fillInput(url, username)) {
       await delay(100) // wait due to async input event processing
-      return await this.fillInput(hostname, password)
+      return await this.fillInput(url, password)
     }
 
     return false
   }
 
-  async fillInput(hostname, { selector, value }) {
-    if (await this.focus(hostname, selector)) {
+  async fillInput(url, { selector, value }) {
+    if (await this.focus(url, selector)) {
       this.typeWord(value)
       return true
     }
@@ -57,8 +49,8 @@ module.exports.CredentialsFiller = class CredentialsFiller {
     return false
   }
 
-  async focus(hostname, selector) {
-    const cmd = `${getElementCenter.toString()};getElementCenter("${hostname}", "${selector}");`
+  async focus(url, selector) {
+    const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
     const center = await this.webContents.executeJavaScript(cmd, false)
 
     if (center) {
@@ -81,7 +73,7 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   }
 }
 
-function getElementCenter(hostname, selector, root = document, parentOffset = [0, 0]) {
+function getElementCenter(url, selector, root = document, parentOffset = [0, 0]) {
   const iframes = root.getElementsByTagName("iframe")
   for (const iframe of iframes) {
     const iframeOffset = [
@@ -89,9 +81,9 @@ function getElementCenter(hostname, selector, root = document, parentOffset = [0
       parentOffset[1] + iframe.getBoundingClientRect().top,
     ]
 
-    const iframeHostname = new URL(iframe.getAttribute("src")).hostname
+    const iframeUrl = iframe.getAttribute("src").split("?")[0]
 
-    if (iframeHostname === hostname) {
+    if (iframeUrl === url) {
       const element = iframe.contentDocument.querySelector(selector)
 
       if (element) {
@@ -101,7 +93,7 @@ function getElementCenter(hostname, selector, root = document, parentOffset = [0
         return null
       }
     } else {
-      return getElementCenter(hostname, selector, iframe.contentDocument, iframeOffset)
+      return getElementCenter(url, selector, iframe.contentDocument, iframeOffset)
     }
   }
   return null
@@ -114,7 +106,7 @@ module.exports.loadCredentials = async (httpBrokerUri) => {
     return fromPairs(
       data.children
         .map(({ payload }) => JSON.parse(payload))
-        .map(({ hostname, username, password }) => [hostname, { username, password }])
+        .map(({ url, username, password }) => [url, { username, password }])
     )
   } catch (error) {
     /* ignore */
