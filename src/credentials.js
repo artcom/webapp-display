@@ -1,4 +1,5 @@
 const axios = require("axios")
+const { session } = require("electron")
 const fromPairs = require("lodash.frompairs")
 
 module.exports.CredentialsFiller = class CredentialsFiller {
@@ -6,14 +7,21 @@ module.exports.CredentialsFiller = class CredentialsFiller {
     this.webContents = webContents
     this.credentialsData = credentialsData
     this.logger = logger
+    this.previousHostname = null
   }
 
   async listen() {
-    this.webContents.on("did-frame-navigate", async (event, baseUrl) => {
-      const hostname = new URL(baseUrl).hostname
+    session.defaultSession.webRequest.onCompleted(async (details) => {
+      //console.log(details)
+      var url = details.url
+
+      const hostname = new URL(url).hostname
+      console.log(hostname)
+
       const credentials = this.credentialsData[hostname]
 
-      if (credentials) {
+      if (credentials && this.previousHostname !== hostname) {
+        this.previousHostname = hostname
         this.logger.info(`Try to fill credentials for hostname: ${hostname}`)
         await delay(200)
         if (!(await this.fillCredentials(hostname, credentials))) {
