@@ -16,14 +16,14 @@ module.exports.CredentialsFiller = class CredentialsFiller {
       var url = details.url
 
       const hostname = new URL(url).hostname
-      console.log(hostname)
+      console.log(url)
 
       const credentials = this.credentialsData[hostname]
 
       if (credentials && this.previousHostname !== hostname) {
         this.previousHostname = hostname
         this.logger.info(`Try to fill credentials for hostname: ${hostname}`)
-        await delay(200)
+        await delay(500)
         if (!(await this.fillCredentials(hostname, credentials))) {
           await delay(1000)
           if (!(await this.fillCredentials(hostname, credentials))) {
@@ -31,6 +31,11 @@ module.exports.CredentialsFiller = class CredentialsFiller {
           }
         }
       }
+    })
+
+    this.webContents.on("will-navigate", async () => {
+      console.log("clear")
+      this.previousHostname = null
     })
   }
 
