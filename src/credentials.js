@@ -99,7 +99,7 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
         return null
       }
     } else {
-      return getElementCenter(url, selector, iframe.contentDocument, iframeOffset)
+      //return getElementCenter(url, selector, iframe.contentDocument, iframeOffset)
     }
   }
   return null
