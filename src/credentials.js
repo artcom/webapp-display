@@ -10,7 +10,6 @@ module.exports.CredentialsFiller = class CredentialsFiller {
     this.webContents = webContents
     this.credentialsData = credentialsData
     this.logger = logger
-    this.previousHostname = null
   }
 
   async listen() {
@@ -20,7 +19,6 @@ module.exports.CredentialsFiller = class CredentialsFiller {
       const credentials = this.credentialsData[url]
 
       if (credentials) {
-        this.previousHostname = url
         this.logger.info(`Try to fill credentials for url: ${url}`)
         await delay(500)
 
