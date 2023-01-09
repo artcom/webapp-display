@@ -16,7 +16,6 @@ module.exports.CredentialsFiller = class CredentialsFiller {
   async listen() {
     session.defaultSession.webRequest.onCompleted(async (details) => {
       const url = details.url.split("?")[0]
-      console.log(url)
 
       const credentials = this.credentialsData[url]
 
@@ -24,21 +23,18 @@ module.exports.CredentialsFiller = class CredentialsFiller {
         this.previousHostname = url
         this.logger.info(`Try to fill credentials for url: ${url}`)
         await delay(500)
-        if (!(await this.fillCredentials(url, credentials))) {
-          await this.retryFillCredientials(url, credentials)
+
+        for (let i = 0; i <= RETRY_ATTEMPTS; i++) {
+          if (await this.fillCredentials(url, credentials)) {
+            return
+          }
+
+          await delay(RETRY_TIMEOUT)
         }
+
+        this.logger.info(`Could not fill credentials for url: ${url}`)
       }
     })
-  }
-
-  async retryFillCredientials(url, credentials) {
-    for (let i = 0; i <= RETRY_ATTEMPTS; i++) {
-      if (await this.fillCredentials(url, credentials)) {
-        return
-      }
-      await delay(RETRY_TIMEOUT)
-    }
-    this.logger.info(`Could not fill credentials for url: ${url}`)
   }
 
   async fillCredentials(url, { password, username }) {
