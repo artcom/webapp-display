@@ -84,3 +84,10 @@ This is a list of some command line arguments (Chromium flags) that can have a p
 --enable-native-gpu-memory-buffers
 --enable-zero-copy
 ```
+
+### Troubleshoot Hints
+
+In the follwing cases the credentials fill-in functionality is not working correctly:
+
+- When devtools are opened, the window is resized and the second input field can't be found.
+- When the same site is loaded instantly again without logging in before. The credentials are filled in the elements of the "old" disappearing iframe in this case.
