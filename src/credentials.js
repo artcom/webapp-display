@@ -2,6 +2,9 @@ const axios = require("axios")
 const { session } = require("electron")
 const fromPairs = require("lodash.frompairs")
 
+const RETRY_ATTEMPTS = 3
+const RETRY_TIMEOUT = 1000
+
 module.exports.CredentialsFiller = class CredentialsFiller {
   constructor(webContents, credentialsData, logger) {
     this.webContents = webContents
@@ -22,19 +25,20 @@ module.exports.CredentialsFiller = class CredentialsFiller {
         this.logger.info(`Try to fill credentials for url: ${url}`)
         await delay(500)
         if (!(await this.fillCredentials(url, credentials))) {
-          await delay(1000)
-          if (!(await this.fillCredentials(url, credentials))) {
-            await delay(1000)
-            if (!(await this.fillCredentials(url, credentials))) {
-              await delay(1000)
-              if (!(await this.fillCredentials(url, credentials))) {
-                this.logger.info(`Could not fill credentials for url: ${url}`)
-              }
-            }
-          }
+          await this.retryFillCredientials(url, credentials)
         }
       }
     })
+  }
+
+  async retryFillCredientials(url, credentials) {
+    for (let i = 0; i <= RETRY_ATTEMPTS; i++) {
+      if (await this.fillCredentials(url, credentials)) {
+        return
+      }
+      await delay(RETRY_TIMEOUT)
+    }
+    this.logger.info(`Could not fill credentials for url: ${url}`)
   }
 
   async fillCredentials(url, { password, username }) {
