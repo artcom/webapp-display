@@ -89,12 +89,10 @@ function filterResponseHeaders() {
 function resolveCookie(cookie) {
   const parts = cookie.split(";").map((part) => part.trim())
 
-  // Secure
   if (!parts.find((item) => item.toLowerCase() === "secure")) {
     parts.push("Secure")
   }
 
-  // SameSite
   const index = parts.findIndex((item) => item.toLowerCase().startsWith("samesite"))
   if (index > 0) {
     parts[index] = "SameSite=none"
@@ -102,8 +100,6 @@ function resolveCookie(cookie) {
     parts.push("SameSite=none")
   }
 
-  console.log(cookie)
-  console.log(parts.join("; "))
   return parts.join("; ")
 }
 
