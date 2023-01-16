@@ -68,23 +68,43 @@ function setupEventHandler(win, url, logger) {
 
 function filterResponseHeaders() {
   electron.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        "access-control-allow-origin": "*",
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        ...omitBy(details.responseHeaders, (value, key) =>
-          [
-            "x-frame-options",
-            "content-security-policy",
-            "access-control-allow-origin",
-            "access-control-allow-headers",
-            "access-control-allow-methods",
-          ].includes(key.toLowerCase())
-        ),
-      },
-    })
+    const newHeaders = omitBy(details.responseHeaders, (value, key) =>
+      ["x-frame-options", "content-security-policy"].includes(key.toLowerCase())
+    )
+
+    newHeaders["access-control-allow-origin"] = "*"
+    newHeaders["access-control-allow-headers"] = "*"
+    newHeaders["access-control-allow-methods"] = "*"
+
+    const setCookies = details.responseHeaders["set-cookie"]
+    if (setCookies) {
+      const newSetCookies = setCookies.map((cookie) => resolveCookie(cookie))
+      newHeaders["set-cookie"] = newSetCookies
+    }
+
+    callback({ responseHeaders: newHeaders })
   })
+}
+
+function resolveCookie(cookie) {
+  const parts = cookie.split(";").map((part) => part.trim())
+
+  // Secure
+  if (!parts.find((item) => item.toLowerCase() === "secure")) {
+    parts.push("Secure")
+  }
+
+  // SameSite
+  const index = parts.findIndex((item) => item.toLowerCase().startsWith("samesite"))
+  if (index > 0) {
+    parts[index]("SameSite=none")
+  } else {
+    parts.push("SameSite=none")
+  }
+
+  console.log(cookie)
+  console.log(parts.join("; "))
+  return parts.join("; ")
 }
 
 function getDisplay(index, logger) {
