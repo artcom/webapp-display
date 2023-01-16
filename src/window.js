@@ -97,7 +97,7 @@ function resolveCookie(cookie) {
   // SameSite
   const index = parts.findIndex((item) => item.toLowerCase().startsWith("samesite"))
   if (index > 0) {
-    parts[index]("SameSite=none")
+    parts[index] = "SameSite=none"
   } else {
     parts.push("SameSite=none")
   }
