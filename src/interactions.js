@@ -5,10 +5,10 @@ const fromPairs = require("lodash.frompairs")
 const RETRY_ATTEMPTS = 3
 const RETRY_TIMEOUT = 1000
 
-module.exports.CredentialsFiller = class CredentialsFiller {
-  constructor(webContents, credentialsData, logger) {
+module.exports.WebpageInteractor = class WebpageInteractor {
+  constructor(webContents, interactionData, logger) {
     this.webContents = webContents
-    this.credentialsData = credentialsData
+    this.interactionData = interactionData
     this.logger = logger
   }
 
@@ -16,7 +16,7 @@ module.exports.CredentialsFiller = class CredentialsFiller {
     session.defaultSession.webRequest.onCompleted(async (details) => {
       const url = details.url.split("?")[0]
 
-      const credentials = this.credentialsData[url]
+      const credentials = this.interactionData[url]
 
       if (credentials) {
         this.logger.info(`Try to fill credentials for url: ${url}`)
@@ -113,7 +113,7 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
   return null
 }
 
-module.exports.loadCredentials = async (httpBrokerUri) => {
+module.exports.loadInteractions = async (httpBrokerUri) => {
   try {
     const { data } = await axios.post(`${httpBrokerUri}/query`, { topic: "credentials", depth: -1 })
 

@@ -4,7 +4,7 @@ const bootstrap = require("@artcom/bootstrap-client")
 const config = require("./options")
 const createMenu = require("./menu")
 const { createWindow } = require("./window")
-const { CredentialsFiller, loadCredentials } = require("./credentials")
+const { WebpageInteractor, loadInteractions } = require("./interactions")
 
 const SERVICE_ID = "webappDisplay"
 
@@ -54,14 +54,14 @@ electron.app.on("ready", async () => {
     let window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
 
     electron.Menu.setApplicationMenu(createMenu())
-    await createCredentialsFiller(data, window, logger)
+    await createWebpageInteractor(data, window, logger)
 
     mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
       window.webContents.session.clearCache().then(async () => {
         logger.info("Cache cleared, Restarting...")
         window.close()
         window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
-        await createCredentialsFiller(data, window, logger)
+        await createWebpageInteractor(data, window, logger)
       })
     })
   })
@@ -83,10 +83,10 @@ electron.app.on("window-all-closed", () => {
   }
 })
 
-async function createCredentialsFiller(data, window, logger) {
-  const credentialsData = await loadCredentials(data.httpBrokerUri)
-  const credentialsFiller = new CredentialsFiller(window.webContents, credentialsData, logger)
-  credentialsFiller.listen()
+async function createWebpageInteractor(data, window, logger) {
+  const interactionData = await loadInteractions(data.httpBrokerUri)
+  const webpageInteractor = new WebpageInteractor(window.webContents, interactionData, logger)
+  webpageInteractor.listen()
 }
 
 function appendSuffix(baseName, suffix, divider = "-") {
