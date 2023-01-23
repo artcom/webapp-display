@@ -16,14 +16,14 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     session.defaultSession.webRequest.onCompleted(async (details) => {
       const url = details.url.split("?")[0]
 
-      const credentials = this.interactionData[url]
+      const interactions = this.interactionData[url]
 
-      if (credentials) {
+      if (interactions) {
         this.logger.info(`Try to fill credentials for url: ${url}`)
         await delay(500)
 
         for (let i = 0; i <= RETRY_ATTEMPTS; i++) {
-          if (await this.fillCredentials(url, credentials)) {
+          if (await this.fillCredentials(url, interactions)) {
             console.log("credentials in")
             await this.focus(url, "[aria-label=Anmelden]") //relution: [id=BTN_LOGIN]
             console.log("logged in")
