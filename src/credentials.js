@@ -24,6 +24,8 @@ module.exports.CredentialsFiller = class CredentialsFiller {
 
         for (let i = 0; i <= RETRY_ATTEMPTS; i++) {
           if (await this.fillCredentials(url, credentials)) {
+            console.log("logged in")
+            this.focus2(url, "[aria-label=Anmelden]") //relution: [id=BTN_LOGIN]
             return
           }
 
@@ -63,6 +65,31 @@ module.exports.CredentialsFiller = class CredentialsFiller {
         button: "left",
         x: center[0],
         y: center[1],
+      })
+      return true
+    } else {
+      return false
+    }
+  }
+
+  async focus2(url, selector) {
+    const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
+    const center = await this.webContents.executeJavaScript(cmd, false)
+
+    if (center) {
+      this.webContents.sendInputEvent({
+        type: "mouseDown",
+        button: "left",
+        x: center[0],
+        y: center[1],
+        clickCount: 1,
+      })
+      this.webContents.sendInputEvent({
+        type: "mouseUp",
+        button: "left",
+        x: center[0],
+        y: center[1],
+        clickCount: 1,
       })
       return true
     } else {
