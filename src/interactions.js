@@ -19,6 +19,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       const interactions = this.interactionData[url]
 
       if (interactions) {
+        console.log(interactions)
         this.logger.info(`Try to fill credentials for url: ${url}`)
         await delay(500)
 
@@ -115,12 +116,15 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
 
 module.exports.loadInteractions = async (httpBrokerUri) => {
   try {
-    const { data } = await axios.post(`${httpBrokerUri}/query`, { topic: "credentials", depth: -1 })
+    const { data } = await axios.post(`${httpBrokerUri}/query`, {
+      topic: "webpageInteractions",
+      depth: -1,
+    })
 
     return fromPairs(
       data.children
         .map(({ payload }) => JSON.parse(payload))
-        .map(({ url, username, password }) => [url, { username, password }])
+        .map(({ url, interactions }) => [url, { interactions }])
     )
   } catch (error) {
     /* ignore */
