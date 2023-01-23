@@ -24,8 +24,10 @@ module.exports.CredentialsFiller = class CredentialsFiller {
 
         for (let i = 0; i <= RETRY_ATTEMPTS; i++) {
           if (await this.fillCredentials(url, credentials)) {
+            console.log("credentials in")
+            await this.focus(url, "[aria-label=Anmelden]") //relution: [id=BTN_LOGIN]
             console.log("logged in")
-            this.clickOnElement(url, "[aria-label=Anmelden]") //relution: [id=BTN_LOGIN]
+
             return
           }
 
@@ -65,32 +67,14 @@ module.exports.CredentialsFiller = class CredentialsFiller {
         button: "left",
         x: center[0],
         y: center[1],
-      })
-      return true
-    } else {
-      return false
-    }
-  }
-
-  async clickOnElement(url, selector) {
-    const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
-    const center = await this.webContents.executeJavaScript(cmd, false)
-
-    const options = {
-      button: "left",
-      x: center[0],
-      y: center[1],
-      clickCount: 1,
-    }
-
-    if (center) {
-      this.webContents.sendInputEvent({
-        ...options,
-        type: "mouseDown",
+        clickCount: 1,
       })
       this.webContents.sendInputEvent({
-        ...options,
         type: "mouseUp",
+        button: "left",
+        x: center[0],
+        y: center[1],
+        clickCount: 1,
       })
       return true
     } else {
