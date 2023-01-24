@@ -68,19 +68,15 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     const center = await this.webContents.executeJavaScript(cmd, false)
 
     if (center) {
+      const options = { button: "left", x: center[0], y: center[1], clickCount: 1 }
+
       this.webContents.sendInputEvent({
         type: "mouseDown",
-        button: "left",
-        x: center[0],
-        y: center[1],
-        clickCount: 1,
+        ...options,
       })
       this.webContents.sendInputEvent({
         type: "mouseUp",
-        button: "left",
-        x: center[0],
-        y: center[1],
-        clickCount: 1,
+        ...options,
       })
       return true
     } else {
