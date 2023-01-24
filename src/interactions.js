@@ -15,27 +15,27 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   async listen() {
     session.defaultSession.webRequest.onCompleted(async (details) => {
       const url = details.url.split("?")[0]
+      //console.log(url)
 
       const interactions = this.interactionData[url]
 
       if (interactions) {
-        console.log(interactions)
-        this.logger.info(`Try to fill credentials for url: ${url}`)
-        await delay(500)
+        for (let i = 0; i < interactions.length; i++) {
+          const interaction = interactions[i]
 
-        for (let i = 0; i <= RETRY_ATTEMPTS; i++) {
-          if (await this.fillCredentials(url, interactions)) {
-            console.log("credentials in")
-            await this.focus(url, "[aria-label=Anmelden]") //relution: [id=BTN_LOGIN]
-            console.log("logged in")
+          if (interaction.input) {
+            this.logger.info(`Try to fill element ${interaction.selector}`)
+            await delay(1000)
 
-            return
+            await this.fillCredentials(url, interaction)
+            this.logger.info(`Filled: ${interaction.selector}!`)
+          } else {
+            this.logger.info(`Try to click element ${interaction.selector}`)
+            await this.focus(url, interaction.selector) //
+            this.logger.info(`Clicked: ${interaction.selector}!`)
           }
-
-          await delay(RETRY_TIMEOUT)
         }
-
-        this.logger.info(`Could not fill credentials for url: ${url}`)
+        this.logger.info(`Did all interactions`)
       }
     })
   }
