@@ -40,18 +40,18 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     })
   }
 
-  async fillCredentials(url, { password, username }) {
-    if (await this.fillInput(url, username)) {
+  async fillCredentials(url, interaction) {
+    if (await this.fillInput(url, interaction)) {
       await delay(100) // wait due to async input event processing
-      return await this.fillInput(url, password)
+      return
     }
 
     return false
   }
 
-  async fillInput(url, { selector, value }) {
+  async fillInput(url, { selector, input }) {
     if (await this.focus(url, selector)) {
-      this.typeWord(value)
+      this.typeWord(input)
       return true
     }
 
