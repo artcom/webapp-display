@@ -124,7 +124,7 @@ module.exports.loadInteractions = async (httpBrokerUri) => {
     return fromPairs(
       data.children
         .map(({ payload }) => JSON.parse(payload))
-        .map(({ url, interactions }) => [url, { interactions }])
+        .map(({ url, interactions }) => [url, interactions])
     )
   } catch (error) {
     /* ignore */
