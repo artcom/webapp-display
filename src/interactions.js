@@ -2,7 +2,7 @@ const axios = require("axios")
 const { session } = require("electron")
 const fromPairs = require("lodash.frompairs")
 
-const RETRY_ATTEMPTS = 3
+const RETRY_ATTEMPTS = 10
 const RETRY_TIMEOUT = 1000
 
 module.exports.WebpageInteractor = class WebpageInteractor {
@@ -26,18 +26,18 @@ module.exports.WebpageInteractor = class WebpageInteractor {
             this.logger.info(`Try to fill element ${interaction.selector}`)
             await delay(500)
 
-            for (let n = 0; n <= RETRY_ATTEMPTS; n++) {
-              if (await this.fillCredentials(url, interaction)) {
+            for (let r = 0; r <= RETRY_ATTEMPTS; r++) {
+              if (await this.fillCredential(url, interaction)) {
+                this.logger.info(`Filled: ${interaction.selector}!`)
                 break
               }
               await delay(RETRY_TIMEOUT)
             }
-
-            this.logger.info(`Filled: ${interaction.selector}!`)
           } else {
             this.logger.info(`Try to click element ${interaction.selector}`)
-            await this.focus(url, interaction.selector) //
-            this.logger.info(`Clicked: ${interaction.selector}!`)
+            if (await this.focus(url, interaction.selector)) {
+              this.logger.info(`Clicked: ${interaction.selector}!`)
+            }
           }
         }
         this.logger.info(`Did all interactions`)
@@ -45,7 +45,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     })
   }
 
-  async fillCredentials(url, interaction) {
+  async fillCredential(url, interaction) {
     if (await this.fillInput(url, interaction)) {
       await delay(100)
       return true
