@@ -2,7 +2,7 @@ const axios = require("axios")
 const { session } = require("electron")
 const fromPairs = require("lodash.frompairs")
 
-const RETRY_ATTEMPTS = 10
+const RETRY_ATTEMPTS = 5
 const RETRY_TIMEOUT = 1000
 
 module.exports.WebpageInteractor = class WebpageInteractor {
