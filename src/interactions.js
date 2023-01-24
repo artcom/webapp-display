@@ -25,9 +25,15 @@ module.exports.WebpageInteractor = class WebpageInteractor {
 
           if (interaction.input) {
             this.logger.info(`Try to fill element ${interaction.selector}`)
-            await delay(1000)
+            await delay(500)
 
-            await this.fillCredentials(url, interaction)
+            for (let n = 0; n <= RETRY_ATTEMPTS; n++) {
+              if (await this.fillCredentials(url, interaction)) {
+                break
+              }
+              await delay(RETRY_TIMEOUT)
+            }
+
             this.logger.info(`Filled: ${interaction.selector}!`)
           } else {
             this.logger.info(`Try to click element ${interaction.selector}`)
@@ -42,8 +48,8 @@ module.exports.WebpageInteractor = class WebpageInteractor {
 
   async fillCredentials(url, interaction) {
     if (await this.fillInput(url, interaction)) {
-      await delay(100) // wait due to async input event processing
-      return
+      await delay(100)
+      return true
     }
 
     return false
