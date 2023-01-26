@@ -1,4 +1,3 @@
-const axios = require("axios")
 const { session } = require("electron")
 const fromPairs = require("lodash.frompairs")
 
@@ -115,11 +114,10 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
   return null
 }
 
-module.exports.loadInteractions = async (configServerUri) => {
+module.exports.loadInteractions = async (configServerUri, queryConfig) => {
   try {
-    const { data } = await axios.get(
-      `${configServerUri}/master/services/webappDisplay/interactions`
-    )
+    const data = await queryConfig(`services/webappDisplay/interactions`)
+
     return fromPairs(data.map(({ url, interactions }) => [url, interactions]))
   } catch (error) {
     /* ignore */

@@ -35,7 +35,7 @@ electron.protocol.registerSchemesAsPrivileged([
 ])
 
 electron.app.on("ready", async () => {
-  const { logger, mqttClient, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
+  const { logger, mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
   config.windows.forEach(async ({ deviceSuffix, webAppUrl, bounds, displayIndex }) => {
     logger.info("Options:", config)
@@ -54,14 +54,14 @@ electron.app.on("ready", async () => {
     let window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
 
     electron.Menu.setApplicationMenu(createMenu())
-    await createWebpageInteractor(data, window, logger)
+    await createWebpageInteractor(data, queryConfig, window, logger)
 
     mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
       window.webContents.session.clearCache().then(async () => {
         logger.info("Cache cleared, Restarting...")
         window.close()
         window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
-        await createWebpageInteractor(data, window, logger)
+        await createWebpageInteractor(data, queryConfig, window, logger)
       })
     })
   })
@@ -83,8 +83,8 @@ electron.app.on("window-all-closed", () => {
   }
 })
 
-async function createWebpageInteractor(data, window, logger) {
-  const interactionData = await loadInteractions(data.configServerUri)
+async function createWebpageInteractor(data, queryConfig, window, logger) {
+  const interactionData = await loadInteractions(data.configServerUri, queryConfig)
   const webpageInteractor = new WebpageInteractor(window.webContents, interactionData, logger)
   webpageInteractor.listen()
 }
