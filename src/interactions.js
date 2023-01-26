@@ -35,7 +35,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
             }
           } else {
             this.logger.info(`Try to click element ${interaction.selector}`)
-            if (await this.focus(url, interaction.selector)) {
+            if (await this.clickOn(url, interaction.selector)) {
               this.logger.info(`Clicked: ${interaction.selector}!`)
             }
           }
@@ -55,7 +55,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   }
 
   async fillInput(url, { selector, input }) {
-    if (await this.focus(url, selector)) {
+    if (await this.clickOn(url, selector)) {
       this.typeWord(input)
       return true
     }
@@ -63,7 +63,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     return false
   }
 
-  async focus(url, selector) {
+  async clickOn(url, selector) {
     const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
     const center = await this.webContents.executeJavaScript(cmd, false)
 
