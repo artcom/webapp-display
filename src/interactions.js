@@ -1,8 +1,8 @@
 const { session } = require("electron")
 const fromPairs = require("lodash.frompairs")
 
-const RETRY_ATTEMPTS = 5
-const RETRY_TIMEOUT = 1000
+const RETRY_ATTEMPTS = 20
+const RETRY_TIMEOUT = 500
 
 module.exports.WebpageInteractor = class WebpageInteractor {
   constructor(webContents, interactionData, logger) {
