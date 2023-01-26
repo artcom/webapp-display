@@ -34,8 +34,13 @@ module.exports.WebpageInteractor = class WebpageInteractor {
             }
           } else {
             this.logger.info(`Try to click element ${interaction.selector}`)
-            if (await this.clickOn(url, interaction.selector)) {
-              this.logger.info(`Clicked: ${interaction.selector}!`)
+
+            for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
+              if (await this.clickOn(url, interaction.selector)) {
+                this.logger.info(`Clicked: ${interaction.selector}`)
+                break
+              }
+              await delay(RETRY_TIMEOUT)
             }
           }
         }
