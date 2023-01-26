@@ -25,9 +25,9 @@ module.exports.WebpageInteractor = class WebpageInteractor {
             this.logger.info(`Try to fill element ${interaction.selector}`)
             await delay(500)
 
-            for (let r = 0; r <= RETRY_ATTEMPTS; r++) {
+            for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
               if (await this.fillCredential(url, interaction)) {
-                this.logger.info(`Filled: ${interaction.selector}!`)
+                this.logger.info(`Filled: ${interaction.selector}`)
                 break
               }
               await delay(RETRY_TIMEOUT)
