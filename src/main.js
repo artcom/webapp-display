@@ -84,7 +84,7 @@ electron.app.on("window-all-closed", () => {
 })
 
 async function createWebpageInteractor(data, window, logger) {
-  const interactionData = await loadInteractions(data.httpBrokerUri)
+  const interactionData = await loadInteractions(data.configServerUri)
   const webpageInteractor = new WebpageInteractor(window.webContents, interactionData, logger)
   webpageInteractor.listen()
 }

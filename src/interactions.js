@@ -115,18 +115,12 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
   return null
 }
 
-module.exports.loadInteractions = async (httpBrokerUri) => {
+module.exports.loadInteractions = async (configServerUri) => {
   try {
-    const { data } = await axios.post(`${httpBrokerUri}/query`, {
-      topic: "webpageInteractions",
-      depth: -1,
-    })
-
-    return fromPairs(
-      data.children
-        .map(({ payload }) => JSON.parse(payload))
-        .map(({ url, interactions }) => [url, interactions])
+    const { data } = await axios.get(
+      `${configServerUri}/master/services/webappDisplay/interactions`
     )
+    return fromPairs(data.map(({ url, interactions }) => [url, interactions]))
   } catch (error) {
     /* ignore */
   }
