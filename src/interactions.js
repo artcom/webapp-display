@@ -18,33 +18,35 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       const interactions = this.interactionData[url]
 
       if (interactions) {
-        for (let i = 0; i < interactions.length; i++) {
-          const interaction = interactions[i]
+        await delay(500)
+        try {
+          for (const interaction of interactions) {
+            if (interaction.input) {
+              this.logger.info(`Try to fill element ${interaction.selector}`)
 
-          if (interaction.input) {
-            this.logger.info(`Try to fill element ${interaction.selector}`)
-            await delay(500)
-
-            for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
-              if (await this.fillCredential(url, interaction)) {
-                this.logger.info(`Filled: ${interaction.selector}`)
-                break
+              for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
+                if (await this.fillCredential(url, interaction)) {
+                  this.logger.info(`Filled: ${interaction.selector}`)
+                  break
+                }
+                await delay(RETRY_TIMEOUT)
               }
-              await delay(RETRY_TIMEOUT)
-            }
-          } else {
-            this.logger.info(`Try to click element ${interaction.selector}`)
+            } else {
+              this.logger.info(`Try to click element ${interaction.selector}`)
 
-            for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
-              if (await this.clickOn(url, interaction.selector)) {
-                this.logger.info(`Clicked: ${interaction.selector}`)
-                break
+              for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
+                if (await this.clickOn(url, interaction.selector)) {
+                  this.logger.info(`Clicked: ${interaction.selector}`)
+                  break
+                }
+                await delay(RETRY_TIMEOUT)
               }
-              await delay(RETRY_TIMEOUT)
             }
           }
+          this.logger.info(`Did all interactions`)
+        } catch (error) {
+          this.logger.info(`Could not perform all interactions because: ${error}`)
         }
-        this.logger.info(`Did all interactions`)
       }
     })
   }
