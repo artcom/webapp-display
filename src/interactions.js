@@ -18,9 +18,10 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       const interactions = this.interactionData[url]
 
       if (interactions) {
-        await delay(500)
         try {
           for (const interaction of interactions) {
+            await delay(interaction.delay || 0)
+
             if (interaction.input) {
               this.logger.info(`Try to fill element ${interaction.selector}`)
 
