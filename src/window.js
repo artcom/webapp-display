@@ -107,8 +107,9 @@ function getDisplay(index, logger) {
   const displays = electron.screen.getAllDisplays()
   const display = displays[index]
   if (!display) {
-    logger.info(`Display must be between 0 and ${displays.length - 1} (not ${index})`)
-    process.exit(1)
+    logger.error(
+      `No display found for display index ${index}. Available range: 0 to ${displays.length - 1}.`
+    )
   }
 
   return display
