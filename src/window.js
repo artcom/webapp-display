@@ -69,7 +69,13 @@ function setupEventHandler(win, url, logger) {
 function filterResponseHeaders() {
   electron.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const newHeaders = omitBy(details.responseHeaders, (value, key) =>
-      ["x-frame-options", "content-security-policy"].includes(key.toLowerCase())
+      [
+        "x-frame-options",
+        "content-security-policy",
+        "access-control-allow-origin",
+        "access-control-allow-headers",
+        "access-control-allow-methods",
+      ].includes(key.toLowerCase())
     )
 
     newHeaders["access-control-allow-origin"] = "*"
