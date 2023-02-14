@@ -71,7 +71,10 @@ function modifyResponseHeaders(session) {
     delete modifiedHeaders["x-frame-options"]
     delete modifiedHeaders["content-security-policy"]
 
-    modifiedHeaders["access-control-allow-origin"] = "*"
+    const credentialsHeader = modifiedHeaders["access-control-allow-credentials"]
+    if (!credentialsHeader) {
+      modifiedHeaders["access-control-allow-origin"] = "*"
+    }
     modifiedHeaders["access-control-allow-headers"] = "*"
     modifiedHeaders["access-control-allow-methods"] = "*"
 
