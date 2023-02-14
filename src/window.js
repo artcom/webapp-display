@@ -17,11 +17,11 @@ module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
 
   const options = {
     fullscreen: isFullscreen,
-    session,
     x: windowBounds.x + display.bounds.x,
     y: windowBounds.y + display.bounds.y,
     autoHideMenuBar: true,
     webPreferences: {
+      session,
       webviewTag: true,
       preload: path.join(electron.app.getAppPath(), "src", "preload.js"),
       webSecurity: false,
