@@ -12,7 +12,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   }
 
   async listen() {
-    session.defaultSession.webRequest.onCompleted(async (details) => {
+    this.webContents.session.webRequest.onCompleted(async (details) => {
       const url = details.url.split("?")[0]
 
       const interactions = this.interactionData[url]
