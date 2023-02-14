@@ -1,5 +1,4 @@
 const electron = require("electron")
-const omitBy = require("lodash.omitby")
 const path = require("path")
 
 module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
@@ -37,7 +36,7 @@ module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
   win.setMenu(null)
   setupEventHandler(win, url, logger)
 
-  filterResponseHeaders()
+  modifyResponseHeaders(session)
 
   logger.info(`Loading url: ${url}`)
   win.loadURL(url)
@@ -66,29 +65,22 @@ function setupEventHandler(win, url, logger) {
   })
 }
 
-function filterResponseHeaders() {
-  electron.session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    const newHeaders = omitBy(details.responseHeaders, (value, key) =>
-      [
-        "x-frame-options",
-        "content-security-policy",
-        "access-control-allow-origin",
-        "access-control-allow-headers",
-        "access-control-allow-methods",
-      ].includes(key.toLowerCase())
-    )
+function modifyResponseHeaders(session) {
+  session.webRequest.onHeadersReceived((details, callback) => {
+    const modifiedHeaders = convertAllKeysToLowerCase(details.responseHeaders)
+    delete modifiedHeaders["x-frame-options"]
+    delete modifiedHeaders["content-security-policy"]
 
-    newHeaders["access-control-allow-origin"] = "*"
-    newHeaders["access-control-allow-headers"] = "*"
-    newHeaders["access-control-allow-methods"] = "*"
+    modifiedHeaders["access-control-allow-origin"] = "*"
+    modifiedHeaders["access-control-allow-headers"] = "*"
+    modifiedHeaders["access-control-allow-methods"] = "*"
 
-    const setCookies = details.responseHeaders["set-cookie"]
+    const setCookies = modifiedHeaders["set-cookie"]
     if (setCookies) {
-      const newSetCookies = setCookies.map((cookie) => resolveCookie(cookie))
-      newHeaders["set-cookie"] = newSetCookies
+      modifiedHeaders["set-cookie"] = setCookies.map((cookie) => resolveCookie(cookie))
     }
 
-    callback({ responseHeaders: newHeaders })
+    callback({ responseHeaders: modifiedHeaders })
   })
 }
 
@@ -119,4 +111,8 @@ function getDisplay(index, logger) {
   }
 
   return display
+}
+
+function convertAllKeysToLowerCase(obj) {
+  return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.toLowerCase(), value]))
 }
