@@ -51,19 +51,24 @@ electron.app.on("ready", async () => {
       appendParamIfNotPresent(webAppUrlObj.searchParams, key, value)
     )
 
-    let window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
+    const display = electron.screen.getAllDisplays()[displayIndex]
+    if (display) {
+      let window = createWindow(device, webAppUrlObj.toString(), bounds, display, logger)
 
-    electron.Menu.setApplicationMenu(createMenu())
-    await createWebpageInteractor(data, queryConfig, window, logger)
+      electron.Menu.setApplicationMenu(createMenu())
+      await createWebpageInteractor(data, queryConfig, window, logger)
 
-    mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
-      window.webContents.session.clearCache().then(async () => {
-        logger.info("Cache cleared, Restarting...")
-        window.close()
-        window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
-        await createWebpageInteractor(data, queryConfig, window, logger)
+      mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
+        window.webContents.session.clearCache().then(async () => {
+          logger.info("Cache cleared, Restarting...")
+          window.close()
+          window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
+          await createWebpageInteractor(data, queryConfig, window, logger)
+        })
       })
-    })
+    } else {
+      logger.error(`No display found for display index ${displayIndex}.`)
+    }
   })
 
   let shuttingDown = false

@@ -1,13 +1,12 @@
 const electron = require("electron")
 const path = require("path")
 
-module.exports.createWindow = (sessionId, url, bounds, displayId, logger) => {
+module.exports.createWindow = (sessionId, url, bounds, display, logger) => {
   const session = electron.session.fromPartition(`persist:webapp-display-${sessionId}`, {
     cache: true,
   })
   const isFullscreen = bounds === null
   const windowBounds = { x: 0, y: 0, width: 800, height: 600, ...bounds }
-  const display = getDisplay(displayId, logger)
   const windowedOptions = {
     width: windowBounds.width,
     height: windowBounds.height,
@@ -102,18 +101,6 @@ function resolveCookie(cookie) {
   }
 
   return parts.join("; ")
-}
-
-function getDisplay(index, logger) {
-  const displays = electron.screen.getAllDisplays()
-  const display = displays[index]
-  if (!display) {
-    logger.error(
-      `No display found for display index ${index}. Available range: 0 to ${displays.length - 1}.`
-    )
-  }
-
-  return display
 }
 
 function convertAllKeysToLowerCase(obj) {
