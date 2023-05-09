@@ -33,6 +33,8 @@ module.exports.createWindow = (sessionId, url, bounds, display, logger) => {
   )
 
   win.setMenu(null)
+  win.setAlwaysOnTop(true, "normal")
+
   setupEventHandler(win, url, logger)
 
   modifyResponseHeaders(session)
