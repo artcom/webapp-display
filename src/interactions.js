@@ -1,4 +1,3 @@
-const { session } = require("electron")
 const fromPairs = require("lodash.frompairs")
 
 const RETRY_ATTEMPTS = 20
