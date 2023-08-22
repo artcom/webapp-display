@@ -62,7 +62,7 @@ electron.app.on("ready", async () => {
         window.webContents.session.clearCache().then(async () => {
           logger.info("Cache cleared, Restarting...")
           window.close()
-          window = createWindow(device, webAppUrlObj.toString(), bounds, displayIndex, logger)
+          window = createWindow(device, webAppUrlObj.toString(), bounds, display, logger)
           await createWebpageInteractor(data, queryConfig, window, logger)
         })
       })
