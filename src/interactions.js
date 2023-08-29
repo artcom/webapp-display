@@ -35,7 +35,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
               this.logger.info(`Try to click element ${interaction.selector}`)
 
               for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
-                if (await this.clickOn(url, interaction.selector)) {
+                if (await this.clickOn(url, interaction.selector, interaction.index)) {
                   this.logger.info(`Clicked: ${interaction.selector}`)
                   break
                 }
@@ -69,8 +69,8 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     return false
   }
 
-  async clickOn(url, selector) {
-    const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}");`
+  async clickOn(url, selector, index = 0) {
+    const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}", "${index}");`
     const center = await this.webContents.executeJavaScript(cmd, false)
 
     if (center) {
@@ -97,7 +97,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   }
 }
 
-function getElementCenter(url, selector, root = document, parentOffset = [0, 0]) {
+function getElementCenter(url, selector, index, root = document, parentOffset = [0, 0]) {
   const iframes = root.getElementsByTagName("iframe")
   for (const iframe of iframes) {
     const iframeOffset = [
@@ -109,10 +109,7 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
 
     if (iframeUrl === url) {
       const elements = iframe.contentDocument.querySelectorAll(selector)
-      console.log("elements:", iframe.contentDocument.querySelector(selector))
-
-      const element = elements.length > 1 ? elements[1] : elements[0]
-      console.log(element)
+      const element = elements[index]
 
       if (element) {
         const { left, right, top, bottom } = element.getBoundingClientRect()
