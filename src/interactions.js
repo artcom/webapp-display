@@ -108,7 +108,11 @@ function getElementCenter(url, selector, root = document, parentOffset = [0, 0])
     const iframeUrl = iframe.getAttribute("src").split("?")[0]
 
     if (iframeUrl === url) {
-      const element = iframe.contentDocument.querySelector(selector)
+      const elements = iframe.contentDocument.querySelectorAll(selector)
+      console.log("elements:", iframe.contentDocument.querySelector(selector))
+
+      const element = elements.length > 1 ? elements[1] : elements[0]
+      console.log(element)
 
       if (element) {
         const { left, right, top, bottom } = element.getBoundingClientRect()
