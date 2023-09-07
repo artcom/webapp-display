@@ -40,6 +40,46 @@ When using multiple windows each window should get a `deviceSuffix`. This suffix
 
 The app subscribes to the topic `devices/<device>/doClearCacheAndRestart`. Messages on this topic cause the disk cache to be cleared and the app window to be restarted. The restart is necessary so that the memory cache is also discarded in addition to the deleted disk cache.
 
+### Automatic Website Interactions
+
+Some websites require login credentials or cookie accecption (cookie banner). These interactions can be automated with an interaction configuration.
+examples:
+
+```
+  {
+    "url": "https://live.relution.io/",
+    "interactions": [
+      {
+        "selector": "input#mat-input-1",
+        "input": "name"
+      },
+      {
+        "selector": "input#mat-input-0",
+        "input": "password"
+      },
+      {
+        "selector": "[id=BTN_LOGIN]"
+      }
+    ]
+  },
+  {
+    "url": "https://www.telekom-beethoven-competition.de/itbcb-de",
+    "interactions": [
+      {
+        "delay": 2500,
+        "selector": "[data-cookie-optin-set=all]",
+        "index": 1
+      }
+    ]
+  }
+```
+
+- _selector_ is the element to be clicked on.
+- _input_ value is used for input fields.
+- _index_ is used to get the right selector, because sometimes there are multiple selectors without an specific id. Default index is 0.
+
+- _delay_ is needed when cookiebanners just appear after a few seconds.
+
 ## Build
 
 ### Windows with Docker
