@@ -21,6 +21,7 @@ The webapp-display supports a `single window` and a `multi window` configuration
   - `webAppUrl`
   - `displayIndex` optional, default: `0`
   - `bounds` optional, if not set the window mode will be fullscreen, example: `{ x: 0, y: 0, width: 800, height: 600 }`
+  - `deviceEmulation` optional, example: `{ type: "desktop", bounds: { width: 3840, height: 2160 } }`
 
 ### Multi Window
 

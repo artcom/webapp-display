@@ -7,6 +7,7 @@ const DEFAULT_CONFIG_FILE = "./config.json"
 const DEFAULT_WINDOW_CONFIG = {
   displayIndex: 0,
   bounds: null,
+  deviceEmulationBounds: null,
   deviceSuffix: null,
 }
 

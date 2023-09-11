@@ -37,39 +37,55 @@ electron.protocol.registerSchemesAsPrivileged([
 electron.app.on("ready", async () => {
   const { logger, mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
-  config.windows.forEach(async ({ deviceSuffix, webAppUrl, bounds, displayIndex }) => {
-    logger.info("Options:", config)
+  config.windows.forEach(
+    async ({ deviceSuffix, webAppUrl, bounds, deviceEmulation, displayIndex }) => {
+      logger.info("Options:", config)
 
-    const device = appendSuffix(data.device, deviceSuffix)
-    const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
+      const device = appendSuffix(data.device, deviceSuffix)
+      const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
 
-    const webAppUrlObj = new URL(webAppUrl)
-    appendParamIfNotPresent(webAppUrlObj.searchParams, "device", device)
-    appendParamIfNotPresent(webAppUrlObj.searchParams, "deviceTopic", deviceTopic)
+      const webAppUrlObj = new URL(webAppUrl)
+      appendParamIfNotPresent(webAppUrlObj.searchParams, "device", device)
+      appendParamIfNotPresent(webAppUrlObj.searchParams, "deviceTopic", deviceTopic)
 
-    Object.entries(data).forEach(([key, value]) =>
-      appendParamIfNotPresent(webAppUrlObj.searchParams, key, value)
-    )
+      Object.entries(data).forEach(([key, value]) =>
+        appendParamIfNotPresent(webAppUrlObj.searchParams, key, value)
+      )
 
-    const display = electron.screen.getAllDisplays()[displayIndex]
-    if (display) {
-      let window = createWindow(device, webAppUrlObj.toString(), bounds, display, logger)
+      const display = electron.screen.getAllDisplays()[displayIndex]
+      if (display) {
+        let window = createWindow(
+          device,
+          webAppUrlObj.toString(),
+          bounds,
+          deviceEmulation,
+          display,
+          logger
+        )
 
-      electron.Menu.setApplicationMenu(createMenu())
-      await createWebpageInteractor(data, queryConfig, window, logger)
+        electron.Menu.setApplicationMenu(createMenu())
+        await createWebpageInteractor(data, queryConfig, window, logger)
 
-      mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
-        window.webContents.session.clearCache().then(async () => {
-          logger.info("Cache cleared, Restarting...")
-          window.close()
-          window = createWindow(device, webAppUrlObj.toString(), bounds, display, logger)
-          await createWebpageInteractor(data, queryConfig, window, logger)
+        mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
+          window.webContents.session.clearCache().then(async () => {
+            logger.info("Cache cleared, Restarting...")
+            window.close()
+            window = createWindow(
+              device,
+              webAppUrlObj.toString(),
+              bounds,
+              deviceEmulation,
+              display,
+              logger
+            )
+            await createWebpageInteractor(data, queryConfig, window, logger)
+          })
         })
-      })
-    } else {
-      logger.error(`No display found for display index ${displayIndex}.`)
+      } else {
+        logger.error(`No display found for display index ${displayIndex}.`)
+      }
     }
-  })
+  )
 
   let shuttingDown = false
   process.on("SIGINT", () => {

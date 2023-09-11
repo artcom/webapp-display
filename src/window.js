@@ -1,7 +1,7 @@
 const electron = require("electron")
 const path = require("path")
 
-module.exports.createWindow = (sessionId, url, bounds, display, logger) => {
+module.exports.createWindow = (sessionId, url, bounds, deviceEmulation, display, logger) => {
   const session = electron.session.fromPartition(`persist:webapp-display-${sessionId}`, {
     cache: true,
   })
@@ -33,9 +33,10 @@ module.exports.createWindow = (sessionId, url, bounds, display, logger) => {
   )
 
   win.setMenu(null)
+
   win.setAlwaysOnTop(true, "normal")
 
-  setupEventHandler(win, url, logger)
+  setupEventHandler(win, url, logger, deviceEmulation)
 
   modifyResponseHeaders(session)
 
@@ -45,12 +46,22 @@ module.exports.createWindow = (sessionId, url, bounds, display, logger) => {
   return win
 }
 
-function setupEventHandler(win, url, logger) {
+function setupEventHandler(win, url, logger, deviceEmulation) {
   win.on("unresponsive", () => logger.info("The application has become unresponsive."))
 
   win.webContents.on("render-process-gone", (event, details) =>
     logger.info(`Render process gone, reason: ${details.reason}`)
   )
+
+  if (deviceEmulation) {
+    win.webContents.once("dom-ready", () => {
+      win.webContents.enableDeviceEmulation({
+        screenPosition: deviceEmulation.type,
+        viewSize: { width: deviceEmulation.bounds.width, height: deviceEmulation.bounds.height },
+        scale: getFitToViewRatio(deviceEmulation.bounds, win.getBounds()),
+      })
+    })
+  }
 
   win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
     logger.info(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
@@ -107,4 +118,8 @@ function resolveCookie(cookie) {
 
 function convertAllKeysToLowerCase(obj) {
   return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.toLowerCase(), value]))
+}
+
+function getFitToViewRatio({ width, height }, { width: viewWidth, height: viewHeight }) {
+  return Math.min(viewWidth / width, viewHeight / height)
 }
