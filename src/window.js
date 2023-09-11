@@ -54,13 +54,17 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   )
 
   if (deviceEmulation) {
-    win.webContents.once("dom-ready", () => {
-      win.webContents.enableDeviceEmulation({
-        screenPosition: deviceEmulation.type,
-        viewSize: { width: deviceEmulation.bounds.width, height: deviceEmulation.bounds.height },
-        scale: getFitToViewRatio(deviceEmulation.bounds, win.getBounds()),
-      })
-    })
+    win.webContents.once("dom-ready", () =>
+      win.webContents.enableDeviceEmulation(
+        getDeviceEmulationMetrics(deviceEmulation, win.getBounds())
+      )
+    )
+
+    win.on("resize", () =>
+      win.webContents.enableDeviceEmulation(
+        getDeviceEmulationMetrics(deviceEmulation, win.getBounds())
+      )
+    )
   }
 
   win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
@@ -122,4 +126,12 @@ function convertAllKeysToLowerCase(obj) {
 
 function getFitToViewRatio({ width, height }, { width: viewWidth, height: viewHeight }) {
   return Math.min(viewWidth / width, viewHeight / height)
+}
+
+function getDeviceEmulationMetrics(deviceEmulation, windowBounds) {
+  return {
+    screenPosition: deviceEmulation.type,
+    viewSize: { width: deviceEmulation.bounds.width, height: deviceEmulation.bounds.height },
+    scale: getFitToViewRatio(deviceEmulation.bounds, windowBounds),
+  }
 }
