@@ -54,17 +54,32 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   )
 
   if (deviceEmulation) {
-    win.webContents.once("dom-ready", () =>
-      win.webContents.enableDeviceEmulation(
-        getDeviceEmulationMetrics(deviceEmulation, win.getBounds())
-      )
-    )
+    // Use Chrome DevTools Protocol (https://chromedevtools.github.io/devtools-protocol/)
+    win.webContents.on("dom-ready", () => {
+      try {
+        win.webContents.debugger.attach()
+        win.webContents.debugger.sendCommand(
+          "Emulation.setDeviceMetricsOverride",
+          getDeviceEmulationOverrides(deviceEmulation, win.getBounds())
+        )
+        win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {
+          enabled: true,
+        })
+        win.webContents.debugger.sendCommand("Emulation.setEmitTouchEventsForMouse", {
+          enabled: true,
+          configuration: "mobile",
+        })
+      } catch (err) {
+        console.log("Debugger attach failed : ", err)
+      }
+    })
 
-    win.on("resize", () =>
-      win.webContents.enableDeviceEmulation(
-        getDeviceEmulationMetrics(deviceEmulation, win.getBounds())
+    win.on("resized", () => {
+      win.webContents.debugger.sendCommand(
+        "Emulation.setDeviceMetricsOverride",
+        getDeviceEmulationOverrides(deviceEmulation, win.getBounds())
       )
-    )
+    })
   }
 
   win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
@@ -128,10 +143,12 @@ function getFitToViewRatio({ width, height }, { width: viewWidth, height: viewHe
   return Math.min(viewWidth / width, viewHeight / height)
 }
 
-function getDeviceEmulationMetrics(deviceEmulation, windowBounds) {
+function getDeviceEmulationOverrides(deviceEmulation, windowBounds) {
   return {
-    screenPosition: deviceEmulation.type,
-    viewSize: { width: deviceEmulation.bounds.width, height: deviceEmulation.bounds.height },
+    width: deviceEmulation.bounds.width,
+    height: deviceEmulation.bounds.height,
+    deviceScaleFactor: 2,
     scale: getFitToViewRatio(deviceEmulation.bounds, windowBounds),
+    mobile: deviceEmulation.type === "mobile",
   }
 }
