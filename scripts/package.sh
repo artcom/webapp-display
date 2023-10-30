@@ -15,7 +15,10 @@ do
   echo "Packaging for ${platforms[$i]} platform"
   cd "${build_dirs[$i]}"
   echo {\"version\": \"$COMMIT_TAG\", \"commit\": \"$COMMIT_HASH\", \"buildJob\": $CI_JOB_ID} > build.json
-  zip -r -9 $ARTIFACTS_DIR/${REPOSITORY/$OWNER\//}-${platforms[$i]}-$COMMIT_TAG.zip *
-  tar czvf $ARTIFACTS_DIR/${REPOSITORY/$OWNER\//}-${platforms[$i]}-$COMMIT_TAG.tar.gz *
+  if [ ${platforms[$i]} = "win" ]; then
+    zip -r -9 $ARTIFACTS_DIR/${REPOSITORY/$OWNER\//}-${platforms[$i]}-$COMMIT_TAG.zip *
+  else
+    tar czvf $ARTIFACTS_DIR/${REPOSITORY/$OWNER\//}-${platforms[$i]}-$COMMIT_TAG.tar.gz *
+  fi
   cd $PROJECT_DIR
 done
