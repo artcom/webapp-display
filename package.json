@@ -39,7 +39,7 @@
     }
   },
   "engines": {
-    "node": "16.15.0"
+    "node": "18.18"
   },
   "dependencies": {
     "@artcom/bootstrap-client": "^4.6.0",
