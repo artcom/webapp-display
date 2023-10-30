@@ -2,7 +2,7 @@
   "name": "webapp-display",
   "private": true,
   "main": "src/main.js",
-  "version": "4.9.10",
+  "version": "4.9.11",
   "scripts": {
     "package:win": "electron-builder build --win",
     "package:mac": "electron-builder build --mac",
