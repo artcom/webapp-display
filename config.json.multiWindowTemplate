@@ -4,7 +4,7 @@
     {
       "webAppUrl": "http://example.com",
       "displayIndex": 0,
-      "deviceSuffix": "Left",
+      "deviceSuffix": "Left"
     },
     {
       "webAppUrl": "http://example.com",
@@ -16,6 +16,10 @@
         "width": 400,
         "height": 400
       },
+        "deviceEmulation": {
+        "type": "desktop",
+        "bounds": { "width": 3840, "height": 2160 }
+  }
     }
   ]
 }
