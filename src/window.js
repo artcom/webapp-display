@@ -10,8 +10,8 @@ module.exports.createWindow = (sessionId, url, bounds, deviceEmulation, display,
   const windowedOptions = {
     width: windowBounds.width,
     height: windowBounds.height,
-    frame: false,
-    transparent: true,
+    frame: true,
+    transparent: false,
   }
 
   const options = {
@@ -29,7 +29,7 @@ module.exports.createWindow = (sessionId, url, bounds, deviceEmulation, display,
   }
 
   const win = new electron.BrowserWindow(
-    isFullscreen ? options : { ...options, ...windowedOptions }
+    isFullscreen ? options : { ...options, ...windowedOptions, title: sessionId }
   )
 
   win.setMenu(null)
@@ -49,6 +49,7 @@ module.exports.createWindow = (sessionId, url, bounds, deviceEmulation, display,
 function setupEventHandler(win, url, logger, deviceEmulation) {
   win.on("unresponsive", () => logger.info("The application has become unresponsive."))
 
+  win.on("page-title-updated", (event) => event.preventDefault())
   win.webContents.on("render-process-gone", (event, details) =>
     logger.info(`Render process gone, reason: ${details.reason}`)
   )
