@@ -148,7 +148,7 @@ function getDeviceEmulationOverrides(deviceEmulation, windowBounds) {
   return {
     width: deviceEmulation.bounds.width,
     height: deviceEmulation.bounds.height,
-    deviceScaleFactor: 2,
+    deviceScaleFactor: 2, //device pixel ratio
     scale: getFitToViewRatio(deviceEmulation.bounds, windowBounds),
     mobile: deviceEmulation.type === "mobile",
   }
