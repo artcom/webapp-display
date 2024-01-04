@@ -141,7 +141,7 @@ function convertAllKeysToLowerCase(obj) {
 }
 
 function getFitToViewRatio({ width, height }, { width: viewWidth, height: viewHeight }) {
-  return Math.min(viewWidth / width, viewHeight / height)
+  return Math.round(Math.min(viewWidth / width, viewHeight / height))
 }
 
 function getDeviceEmulationOverrides(deviceEmulation, windowBounds) {
