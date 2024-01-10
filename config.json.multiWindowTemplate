@@ -16,10 +16,14 @@
         "width": 400,
         "height": 400
       },
-        "deviceEmulation": {
+      "deviceEmulation": {
         "type": "desktop",
-        "bounds": { "width": 3840, "height": 2160 }
-  }
+        "bounds": {
+          "width": 3840,
+          "height": 2160
+        },
+        "enforceAspectRatio": true
+      }
     }
   ]
 }

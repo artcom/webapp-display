@@ -55,6 +55,15 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   )
 
   if (deviceEmulation) {
+    if (deviceEmulation.enforceAspectRatio) {
+      const aspectRatio = deviceEmulation.bounds.width / deviceEmulation.bounds.height
+      win.setAspectRatio(aspectRatio)
+
+      const { width, height } = win.getBounds()
+      const shortSide = Math.min(width, height)
+      win.setSize(shortSide * aspectRatio, shortSide)
+    }
+
     // Use Chrome DevTools Protocol (https://chromedevtools.github.io/devtools-protocol/)
     win.webContents.on("dom-ready", () => {
       try {
@@ -150,7 +159,7 @@ function getDeviceEmulationOverrides(deviceEmulation, windowBounds) {
   return {
     width: deviceEmulation.bounds.width,
     height: deviceEmulation.bounds.height,
-    deviceScaleFactor: 2, //device pixel ratio
+    deviceScaleFactor: deviceEmulation.devicePixelRatio || 2,
     dontSetVisibleSize: true,
     scale: getFitToViewRatio(deviceEmulation.bounds, windowBounds),
     mobile: deviceEmulation.type === "mobile",
