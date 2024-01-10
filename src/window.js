@@ -140,8 +140,10 @@ function convertAllKeysToLowerCase(obj) {
   return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.toLowerCase(), value]))
 }
 
-function getFitToViewRatio({ width, height }, { width: viewWidth, height: viewHeight }) {
-  return Math.round(Math.min(viewWidth / width, viewHeight / height))
+function getFitToViewRatio(deviceEmulationBounds, windowBounds) {
+  const { width: windowWidth, height: windowHeight } = windowBounds
+  const { width: emulationWidth, height: emulationHeight } = deviceEmulationBounds
+  return Math.min(windowWidth / emulationWidth, windowHeight / emulationHeight)
 }
 
 function getDeviceEmulationOverrides(deviceEmulation, windowBounds) {
@@ -149,6 +151,7 @@ function getDeviceEmulationOverrides(deviceEmulation, windowBounds) {
     width: deviceEmulation.bounds.width,
     height: deviceEmulation.bounds.height,
     deviceScaleFactor: 2, //device pixel ratio
+    dontSetVisibleSize: true,
     scale: getFitToViewRatio(deviceEmulation.bounds, windowBounds),
     mobile: deviceEmulation.type === "mobile",
   }
