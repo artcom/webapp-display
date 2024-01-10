@@ -61,7 +61,7 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
 
       const { width, height } = win.getBounds()
       const shortSide = Math.min(width, height)
-      win.setSize(shortSide * aspectRatio, shortSide)
+      win.setSize(Math.round(shortSide * aspectRatio), shortSide)
     }
 
     // Use Chrome DevTools Protocol (https://chromedevtools.github.io/devtools-protocol/)
