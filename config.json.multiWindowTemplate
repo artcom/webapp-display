@@ -17,7 +17,7 @@
         "height": 400
       },
       "deviceEmulation": {
-        "type": "desktop",
+        "isMobile": false,
         "bounds": {
           "width": 3840,
           "height": 2160

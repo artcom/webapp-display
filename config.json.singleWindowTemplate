@@ -5,14 +5,14 @@
   "bounds": {
     "x": 0,
     "y": 0,
-    "width": 800,
-    "height": 600
+    "width": 600,
+    "height": 1200
   },
   "deviceEmulation": {
-    "type": "desktop",
+    "isMobile": true,
     "bounds": {
-      "width": 3840,
-      "height": 2160
+      "width": 400,
+      "height": 800
     },
     "enforceAspectRatio": true
   }

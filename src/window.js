@@ -162,6 +162,6 @@ function getDeviceEmulationOverrides(deviceEmulation, windowBounds) {
     deviceScaleFactor: deviceEmulation.devicePixelRatio || 2,
     dontSetVisibleSize: true,
     scale: getFitToViewRatio(deviceEmulation.bounds, windowBounds),
-    mobile: deviceEmulation.type === "mobile",
+    mobile: deviceEmulation.isMobile || false,
   }
 }
