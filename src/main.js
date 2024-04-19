@@ -1,6 +1,5 @@
 const electron = require("electron")
 
-const bootstrap = require("@artcom/bootstrap-client")
 const config = require("./options")
 const createMenu = require("./menu")
 const { createWindow } = require("./window")
@@ -35,7 +34,6 @@ electron.protocol.registerSchemesAsPrivileged([
 ])
 
 electron.app.on("ready", async () => {
-  const { logger, mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
   config.windows.forEach(
     async ({ deviceSuffix, webAppUrl, bounds, deviceEmulation, displayIndex }) => {
@@ -47,10 +45,6 @@ electron.app.on("ready", async () => {
       const webAppUrlObj = new URL(webAppUrl)
       appendParamIfNotPresent(webAppUrlObj.searchParams, "device", device)
       appendParamIfNotPresent(webAppUrlObj.searchParams, "deviceTopic", deviceTopic)
-
-      Object.entries(data).forEach(([key, value]) =>
-        appendParamIfNotPresent(webAppUrlObj.searchParams, key, value)
-      )
 
       const display = electron.screen.getAllDisplays()[displayIndex]
       if (display) {
