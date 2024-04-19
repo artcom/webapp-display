@@ -34,13 +34,14 @@ electron.protocol.registerSchemesAsPrivileged([
 ])
 
 electron.app.on("ready", async () => {
+ const logger = console
 
   config.windows.forEach(
     async ({ deviceSuffix, webAppUrl, bounds, deviceEmulation, displayIndex }) => {
       logger.info("Options:", config)
 
-      const device = appendSuffix(data.device, deviceSuffix)
-      const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
+      const device = appendSuffix("myDevice", deviceSuffix)
+      const deviceTopic = appendSuffix("myDeviceTopic", deviceSuffix)
 
       const webAppUrlObj = new URL(webAppUrl)
       appendParamIfNotPresent(webAppUrlObj.searchParams, "device", device)
