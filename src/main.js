@@ -61,21 +61,6 @@ electron.app.on("ready", async () => {
         electron.Menu.setApplicationMenu(createMenu())
         await createWebpageInteractor(data, queryConfig, window, logger)
 
-        mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
-          window.webContents.session.clearCache().then(async () => {
-            logger.info("Cache cleared, Restarting...")
-            window.close()
-            window = createWindow(
-              device,
-              webAppUrlObj.toString(),
-              bounds,
-              deviceEmulation,
-              display,
-              logger
-            )
-            await createWebpageInteractor(data, queryConfig, window, logger)
-          })
-        })
       } else {
         logger.error(`No display found for display index ${displayIndex}.`)
       }
@@ -87,7 +72,6 @@ electron.app.on("ready", async () => {
     if (!shuttingDown) {
       shuttingDown = true
       logger.info("Shutting down")
-      mqttClient.disconnect(true)
       process.exit()
     }
   })
