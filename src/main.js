@@ -3,9 +3,6 @@ const electron = require("electron")
 const config = require("./options")
 const createMenu = require("./menu")
 const { createWindow } = require("./window")
-const { WebpageInteractor, loadInteractions } = require("./interactions")
-
-const SERVICE_ID = "webappDisplay"
 
 electron.app.commandLine.appendSwitch("ignore-certificate-errors")
 
@@ -59,8 +56,6 @@ electron.app.on("ready", async () => {
         )
 
         electron.Menu.setApplicationMenu(createMenu())
-        await createWebpageInteractor(data, queryConfig, window, logger)
-
       } else {
         logger.error(`No display found for display index ${displayIndex}.`)
       }
@@ -82,12 +77,6 @@ electron.app.on("window-all-closed", () => {
     electron.app.quit()
   }
 })
-
-async function createWebpageInteractor(data, queryConfig, window, logger) {
-  const interactionData = await loadInteractions(data.configServerUri, queryConfig)
-  const webpageInteractor = new WebpageInteractor(window.webContents, interactionData, logger)
-  webpageInteractor.listen()
-}
 
 function appendSuffix(baseName, suffix, divider = "-") {
   return suffix ? `${baseName}${divider}${suffix}` : baseName
