@@ -19,6 +19,10 @@ electron.app.commandLine.appendSwitch("enable-features", "OverlayScrollbar")
 
 electron.app.commandLine.appendSwitch("disable-site-isolation-trials")
 
+electron.systemPreferences.askForMediaAccess("camera")
+electron.systemPreferences.askForMediaAccess("microphone")
+electron.systemPreferences.askForMediaAccess("screen")
+
 electron.protocol.registerSchemesAsPrivileged([
   {
     scheme: "http",
