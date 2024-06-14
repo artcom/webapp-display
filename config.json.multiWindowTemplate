@@ -4,6 +4,7 @@
     {
       "webAppUrl": "http://example.com",
       "displayIndex": 0,
+      "alwaysOnTop": false,
       "deviceSuffix": "Left"
     },
     {

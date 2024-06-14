@@ -79,6 +79,15 @@ module.exports = function createMenu() {
             }
           },
         },
+        {
+          label: "Toggle Window Always on Top",
+          accelerator: "CommandOrControl+T",
+          click(item, window) {
+            if (window) {
+              window.setAlwaysOnTop(!window.isAlwaysOnTop(), "normal")
+            }
+          },
+        },
       ],
     },
   ]

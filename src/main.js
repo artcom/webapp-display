@@ -19,9 +19,9 @@ electron.app.commandLine.appendSwitch("enable-features", "OverlayScrollbar")
 
 electron.app.commandLine.appendSwitch("disable-site-isolation-trials")
 
-electron.systemPreferences.askForMediaAccess("camera")
-electron.systemPreferences.askForMediaAccess("microphone")
-electron.systemPreferences.askForMediaAccess("screen")
+// electron.systemPreferences.askForMediaAccess("camera")
+// electron.systemPreferences.askForMediaAccess("microphone")
+// electron.systemPreferences.askForMediaAccess("screen")
 
 electron.protocol.registerSchemesAsPrivileged([
   {
@@ -42,7 +42,14 @@ electron.app.on("ready", async () => {
   const { logger, mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
   config.windows.forEach(
-    async ({ deviceSuffix, webAppUrl, bounds, deviceEmulation, displayIndex }) => {
+    async ({
+      deviceSuffix,
+      webAppUrl,
+      bounds,
+      deviceEmulation,
+      displayIndex,
+      alwaysOnTop = true,
+    }) => {
       logger.info("Options:", config)
 
       const device = appendSuffix(data.device, deviceSuffix)
@@ -62,6 +69,7 @@ electron.app.on("ready", async () => {
           device,
           webAppUrlObj.toString(),
           bounds,
+          alwaysOnTop,
           deviceEmulation,
           display,
           logger

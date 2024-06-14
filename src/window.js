@@ -1,7 +1,15 @@
 const electron = require("electron")
 const path = require("path")
 
-module.exports.createWindow = (sessionId, url, bounds, deviceEmulation, display, logger) => {
+module.exports.createWindow = (
+  sessionId,
+  url,
+  bounds,
+  alwaysOnTop,
+  deviceEmulation,
+  display,
+  logger
+) => {
   const session = electron.session.fromPartition(`persist:webapp-display-${sessionId}`, {
     cache: true,
   })
@@ -34,7 +42,9 @@ module.exports.createWindow = (sessionId, url, bounds, deviceEmulation, display,
 
   win.setMenu(null)
 
-  win.setAlwaysOnTop(true, "normal")
+  if (alwaysOnTop) {
+    win.setAlwaysOnTop(true, "normal")
+  }
 
   setupEventHandler(win, url, logger, deviceEmulation)
 
