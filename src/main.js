@@ -87,6 +87,7 @@ electron.app.on("ready", async () => {
               device,
               webAppUrlObj.toString(),
               bounds,
+              alwaysOnTop,
               deviceEmulation,
               display,
               logger
