@@ -18,8 +18,8 @@ module.exports.createWindow = (
   const windowedOptions = {
     width: windowBounds.width,
     height: windowBounds.height,
-    frame: true,
-    transparent: false,
+    frame: false,
+    transparent: true,
   }
 
   const options = {
