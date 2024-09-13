@@ -9,6 +9,7 @@ const DEFAULT_WINDOW_CONFIG = {
   bounds: null,
   deviceEmulationBounds: null,
   deviceSuffix: null,
+  alwaysOnTop: true,
 }
 
 const USAGE = `
