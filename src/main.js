@@ -51,8 +51,6 @@ electron.app.on("ready", async () => {
       displayIndex,
       alwaysOnTop = true,
     }) => {
-      logger.info("Options:", config)
-
       const device = appendSuffix(data.device, deviceSuffix)
       const deviceTopic = appendSuffix(data.deviceTopic, deviceSuffix)
 
@@ -65,16 +63,20 @@ electron.app.on("ready", async () => {
       )
 
       const display = electron.screen.getAllDisplays()[displayIndex]
+
+      const windowOptions = {
+        sessionId: device,
+        url: webAppUrlObj.toString(),
+        bounds,
+        alwaysOnTop,
+        deviceEmulation,
+        display,
+        logger,
+      }
+      logger.info("Window Options:", windowOptions)
+
       if (display) {
-        let window = createWindow(
-          device,
-          webAppUrlObj.toString(),
-          bounds,
-          alwaysOnTop,
-          deviceEmulation,
-          display,
-          logger
-        )
+        let window = createWindow(windowOptions)
 
         electron.Menu.setApplicationMenu(createMenu())
         await createWebpageInteractor(data, queryConfig, window, logger)
@@ -83,15 +85,7 @@ electron.app.on("ready", async () => {
           window.webContents.session.clearCache().then(async () => {
             logger.info("Cache cleared, Restarting...")
             window.close()
-            window = createWindow(
-              device,
-              webAppUrlObj.toString(),
-              bounds,
-              alwaysOnTop,
-              deviceEmulation,
-              display,
-              logger
-            )
+            window = createWindow(windowOptions)
             await createWebpageInteractor(data, queryConfig, window, logger)
           })
         })

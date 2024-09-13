@@ -1,15 +1,15 @@
 const electron = require("electron")
 const path = require("path")
 
-module.exports.createWindow = (
+module.exports.createWindow = ({
   sessionId,
   url,
   bounds,
   alwaysOnTop,
   deviceEmulation,
   display,
-  logger
-) => {
+  logger,
+}) => {
   const session = electron.session.fromPartition(`persist:webapp-display-${sessionId}`, {
     cache: true,
   })
