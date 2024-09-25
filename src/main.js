@@ -1,3 +1,4 @@
+const { logger } = require("./logger")
 const electron = require("electron")
 
 const bootstrap = require("@artcom/bootstrap-client")
@@ -40,7 +41,7 @@ electron.protocol.registerSchemesAsPrivileged([
 ])
 
 electron.app.on("ready", async () => {
-  const { logger, mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
+  const { mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
   config.windows.forEach(
     async ({ deviceSuffix, webAppUrl, bounds, deviceEmulation, displayIndex, alwaysOnTop }) => {

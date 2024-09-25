@@ -90,7 +90,7 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
           configuration: "mobile",
         })
       } catch (err) {
-        console.log("Debugger attach failed : ", err)
+        logger.warn("Debugger attach failed : ", err)
       }
     })
 
