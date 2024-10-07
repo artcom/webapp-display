@@ -15,7 +15,7 @@ function createLoggerWithDir(logDir) {
     new WinstonDailyRotateFile({
       dirname: logDir,
       filename: `webapp-display-%DATE%.log`,
-      datePattern: "YYYY-MM-DD-HH-mm",
+      datePattern: "YYYY-MM-DD",
       maxSize: "100M",
       maxFiles: "7d",
     }),
