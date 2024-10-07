@@ -60,6 +60,22 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   win.on("unresponsive", () => logger.info("The application has become unresponsive."))
 
   win.on("page-title-updated", (event) => event.preventDefault())
+
+  win.webContents.on("console-message", (event, level, message) => {
+    switch (level) {
+      case 0:
+        return logger.debug(message)
+      case 1:
+        return logger.info(message)
+      case 2:
+        return logger.warn(message)
+      case 3:
+        return logger.error(message)
+      default:
+        return logger.info(message)
+    }
+  })
+
   win.webContents.on("render-process-gone", (event, details) =>
     logger.info(`Render process gone, reason: ${details.reason}`)
   )
