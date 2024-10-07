@@ -20,6 +20,7 @@ The webapp-display supports a `single window` and a `multi window` configuration
   - `bootstrapUrl`
   - `webAppUrl`
   - `displayIndex` optional, default: `0`
+  - `logDir` optional, path to persist the log files, default: `./logs`
   - `bounds` optional, if not set the window mode will be fullscreen, example: `{ x: 0, y: 0, width: 800, height: 600 }`
   - `deviceEmulation` optional, example: `{ type: "desktop", bounds: { width: 3840, height: 2160 } }`
 
@@ -32,6 +33,10 @@ The webapp-display supports a `single window` and a `multi window` configuration
     - `deviceSuffix` optional, default: `null`
 
 When using multiple windows each window should get a `deviceSuffix`. This suffix will be appended to the device name from the bootstrap server using `-` as a separator. This results in a unique `device` and `deviceTopic` for each window (e.g. `bootstrapUrl="http://example.com/device-P1"` and `deviceSuffix="Left"` results in `device="device-P1-Left"` and `deviceTopic="devices/device-P1-Left"`).
+
+## Logs
+
+Logs are written to the `logDir` specified in the configuration file. The log files are named `webapp-display-YYYY-MM-DD.log`. The logs are rotated daily and the number of log files is limited to 7.
 
 ## Usage
 

@@ -4,6 +4,8 @@ const path = require("path")
 const packageJson = require("../package.json")
 
 const DEFAULT_CONFIG_FILE = "./config.json"
+const DEFAULT_LOG_DIR = "./logs"
+
 const DEFAULT_WINDOW_CONFIG = {
   displayIndex: 0,
   bounds: null,
@@ -50,6 +52,7 @@ if (cliOptions.inlineConfig || cliOptions.i) {
 
 module.exports = {
   bootstrapUrl: config.bootstrapUrl,
+  logDir: config.logDir || DEFAULT_LOG_DIR,
   windows: config.windows
     ? config.windows.map((windowConfig) => ({ ...DEFAULT_WINDOW_CONFIG, ...windowConfig }))
     : [{ ...DEFAULT_WINDOW_CONFIG, ...config }],

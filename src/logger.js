@@ -3,10 +3,9 @@ const WinstonDailyRotateFile = require("winston-daily-rotate-file")
 const { join, isAbsolute } = require("path")
 const { is } = require("@electron-toolkit/utils")
 const { app } = require("electron")
+const { logDir } = require("./options")
 
-const DEFAULT_LOG_DIR = "./logs"
-
-const logPath = getFullPath(DEFAULT_LOG_DIR)
+const logPath = getFullPath(logDir)
 const logger = createLoggerWithDir(logPath)
 
 function createLoggerWithDir(logDir) {
