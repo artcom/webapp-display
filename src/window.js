@@ -60,8 +60,6 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   win.on("page-title-updated", (event) => event.preventDefault())
   win.on("unresponsive", () => logger.info("The application has become unresponsive."))
   win.on("closed", () => logger.info("Window closed"))
-  win.on("focus", () => logger.info("Window focused"))
-  win.on("blur", () => logger.info("Window blurred"))
 
   win.webContents.on("console-message", (event, level, message) => {
     switch (level) {
