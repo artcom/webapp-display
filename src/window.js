@@ -42,9 +42,22 @@ module.exports.createWindow = ({
 
   win.setMenu(null)
 
+  let enforceFocusInterval
+
   if (alwaysOnTop) {
     win.setAlwaysOnTop(true, "normal")
+    enforceFocusInterval = setInterval(() => {
+      if (!win.isFocused()) {
+        win.focus()
+      }
+    }, 5000)
   }
+
+  win.on("closed", () => {
+    if (enforceFocusInterval) {
+      clearInterval(enforceFocusInterval)
+    }
+  })
 
   setupEventHandler(win, url, logger, deviceEmulation)
 
