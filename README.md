@@ -9,11 +9,23 @@ A stand-alone display loading a webApp. Based on [Electron](http://electron.atom
 
 ## Configuration
 
-The configuration is provided by a `config.json` file whose path can be specified via the command line (see `npm start -- -h`)
+### Command line arguments
 
-The webapp-display supports a `single window` and a `multi window` configuration.
+Command line arguments:
 
-### Single Window
+| Argument          | Description                            | Default         |
+| ----------------- | -------------------------------------- | --------------- |
+| -c --configFile   | Use a specific config file             | `./config.json` |
+| -l --logDir       | Use a specific path for logging        | `./logs`        |
+| -i --inlineConfig | Use the given parameter as JSON config |                 |
+| -h --help         | Show usage information                 |                 |
+| -v --version      | Show version information               |                 |
+
+### Configuration File
+
+The configuration is provided as a `.json` file. The webapp-display supports a `single window` and a `multi window` configuration.
+
+#### Single Window
 
 - Make a copy of `config.json.singleWindowTemplate` and rename it to `./config.json`
 - it contains these options
@@ -23,7 +35,7 @@ The webapp-display supports a `single window` and a `multi window` configuration
   - `bounds` optional, if not set the window mode will be fullscreen, example: `{ x: 0, y: 0, width: 800, height: 600 }`
   - `deviceEmulation` optional, example: `{ type: "desktop", bounds: { width: 3840, height: 2160 } }`
 
-### Multi Window
+#### Multi Window
 
 - Make a copy of `config.json.multiWindowTemplate` and rename it to `config.json`
 - it contains these options
