@@ -2,7 +2,7 @@
   "name": "webapp-display",
   "private": true,
   "main": "src/main.js",
-  "version": "4.10.4",
+  "version": "4.11.1",
   "scripts": {
     "package:win": "electron-builder build --win",
     "package:mac": "electron-builder build --mac",
@@ -43,9 +43,12 @@
   },
   "dependencies": {
     "@artcom/bootstrap-client": "^4.6.0",
+    "@artcom/logger": "^1.6.0",
+    "@electron-toolkit/utils": "^3.0.0",
     "lodash.frompairs": "^4.0.1",
     "minimist": "^1.2.5",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "electron": "^22.3.25",

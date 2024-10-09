@@ -4,6 +4,8 @@ const path = require("path")
 const packageJson = require("../package.json")
 
 const DEFAULT_CONFIG_FILE = "./config.json"
+const DEFAULT_LOG_DIR = "./logs"
+
 const DEFAULT_WINDOW_CONFIG = {
   displayIndex: 0,
   bounds: null,
@@ -17,6 +19,7 @@ const USAGE = `
 
   Options:
     -c --configFile             Use a specific config file, default: ${DEFAULT_CONFIG_FILE}
+    -l --logDir                 Use a specific path for logging, default: ${DEFAULT_LOG_DIR}
     -i --inlineConfig           Use the given parameter as JSON config
     -h --help                   Show usage information
     -v --version                Show version information
@@ -50,6 +53,7 @@ if (cliOptions.inlineConfig || cliOptions.i) {
 
 module.exports = {
   bootstrapUrl: config.bootstrapUrl,
+  logDir: cliOptions.logDir || cliOptions.l || DEFAULT_LOG_DIR,
   windows: config.windows
     ? config.windows.map((windowConfig) => ({ ...DEFAULT_WINDOW_CONFIG, ...windowConfig }))
     : [{ ...DEFAULT_WINDOW_CONFIG, ...config }],
