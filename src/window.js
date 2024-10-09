@@ -42,22 +42,9 @@ module.exports.createWindow = ({
 
   win.setMenu(null)
 
-  let enforceFocusTimeout
-
   if (alwaysOnTop) {
-    win.setAlwaysOnTop(true, "normal")
-    enforceFocusTimeout = setTimeout(() => {
-      if (!win.isFocused()) {
-        win.focus()
-      }
-    }, 10000)
+    win.setAlwaysOnTop(true, "pop-up-menu")
   }
-
-  win.on("closed", () => {
-    if (enforceFocusTimeout) {
-      clearTimeout(enforceFocusTimeout)
-    }
-  })
 
   setupEventHandler(win, url, logger, deviceEmulation)
 

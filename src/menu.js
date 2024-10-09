@@ -84,7 +84,7 @@ module.exports = function createMenu() {
           accelerator: "CommandOrControl+T",
           click(item, window) {
             if (window) {
-              window.setAlwaysOnTop(!window.isAlwaysOnTop(), "normal")
+              window.setAlwaysOnTop(!window.isAlwaysOnTop(), "pop-up-menu")
             }
           },
         },
