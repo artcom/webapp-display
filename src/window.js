@@ -45,7 +45,6 @@ module.exports.createWindow = ({
   let enforceFocusTimeout
 
   if (alwaysOnTop) {
-    win.setAlwaysOnTop(true, "normal")
     enforceFocusTimeout = setTimeout(() => {
       win.focus()
     }, 10000)
