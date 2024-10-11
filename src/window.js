@@ -42,6 +42,21 @@ module.exports.createWindow = ({
 
   win.setMenu(null)
 
+  let enforceFocusTimeout
+
+  if (alwaysOnTop) {
+    win.setAlwaysOnTop(true, "normal")
+    enforceFocusTimeout = setTimeout(() => {
+      win.focus()
+    }, 10000)
+  }
+
+  win.on("closed", () => {
+    if (enforceFocusTimeout) {
+      clearTimeout(enforceFocusTimeout)
+    }
+  })
+
   if (alwaysOnTop) {
     win.setAlwaysOnTop(true, "pop-up-menu")
   }
