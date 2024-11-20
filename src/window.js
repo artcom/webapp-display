@@ -1,5 +1,6 @@
 const electron = require("electron")
 const path = require("path")
+const { getFormattedMemoryUsage } = require("./utils")
 
 module.exports.createWindow = ({
   sessionId,
@@ -69,7 +70,10 @@ module.exports.createWindow = ({
 
 function setupEventHandler(win, url, logger, deviceEmulation) {
   win.on("page-title-updated", (event) => event.preventDefault())
-  win.on("unresponsive", () => logger.info("The application has become unresponsive."))
+  win.on("unresponsive", () => {
+    logger.warn("The application has become unresponsive.")
+    logger.warn(getFormattedMemoryUsage())
+  })
   win.on("closed", () => logger.info("Window closed"))
 
   win.webContents.on("console-message", (event, level, message) => {
