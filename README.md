@@ -144,6 +144,11 @@ This is a list of some command line arguments (Chromium flags) that can have a p
 
 ### Troubleshoot Hints
 
+Reset app permissions on macOS:
+
+- sudo tccutil reset Microphone webapp-display
+- sudo tccutil reset Camera webapp-display
+
 In the follwing cases the credentials fill-in functionality is not working correctly:
 
 - When devtools are opened, the window is resized and the second input field can't be found.
