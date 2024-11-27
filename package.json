@@ -13,7 +13,7 @@
     "start": "electron ."
   },
   "build": {
-    "appId": "webapp-player",
+    "appId": "webapp-display",
     "asar": true,
     "directories": {
       "output": "build"
