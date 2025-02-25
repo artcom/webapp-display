@@ -47,7 +47,7 @@ When using multiple windows each window should get a `deviceSuffix`. This suffix
 
 ## Logs
 
-Logs are created in the path specified via the command line arguments. The log files are named `webapp-display-YYYY-MM-DD.log`. The logs are rotated daily and the number of log files is limited to 7.
+Logs are created in the path specified via the command line arguments. The log files are named `webapp-display-YYYY-MM-DD.log`. The logs are rotated daily and the number of log files is limited to 7. In case that the browser window (chromium) becomes unresponsive, performance metrics will be logged.
 
 ## Usage
 
