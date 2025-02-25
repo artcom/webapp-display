@@ -1,6 +1,7 @@
 const electron = require("electron")
 const path = require("path")
 var os = require("os")
+const { delay } = require("./utils")
 
 module.exports.createWindow = ({
   sessionId,
@@ -218,7 +219,7 @@ async function logCpuUsage(logger, repeatCount = 10) {
   let currentUsage = process.cpuUsage()
   let currentTime = process.hrtime()
   for (let i = 0; i < repeatCount; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    await delay(5000)
     const numCpus = os.cpus().length
 
     const usageDiff = process.cpuUsage(currentUsage)

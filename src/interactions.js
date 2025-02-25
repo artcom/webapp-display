@@ -1,4 +1,5 @@
 const fromPairs = require("lodash.frompairs")
+const { delay } = require("./utils")
 
 const RETRY_ATTEMPTS = 20
 const RETRY_TIMEOUT = 500
@@ -130,8 +131,4 @@ module.exports.loadInteractions = async (configServerUri, queryConfig) => {
   } catch (error) {
     /* ignore */
   }
-}
-
-function delay(time) {
-  return new Promise((resolve) => setTimeout(resolve, time))
 }
