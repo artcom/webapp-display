@@ -1,5 +1,7 @@
 const electron = require("electron")
 const path = require("path")
+var os = require("os")
+const { delay } = require("./utils")
 
 module.exports.createWindow = ({
   sessionId,
@@ -69,7 +71,17 @@ module.exports.createWindow = ({
 
 function setupEventHandler(win, url, logger, deviceEmulation) {
   win.on("page-title-updated", (event) => event.preventDefault())
-  win.on("unresponsive", () => logger.info("The application has become unresponsive."))
+
+  win.on("unresponsive", () => {
+    logger.warn("The application has become unresponsive.", {
+      processMemoryUsage: formatMemoryUsage(process.memoryUsage()),
+      freeMemory: `${toMegaBytes(os.freemem())} MB`,
+      totalMemory: `${toMegaBytes(os.totalmem())} MB`,
+      upTime: process.uptime(),
+      processResourceUsage: process.resourceUsage(),
+    })
+    logCpuUsage(logger)
+  })
   win.on("closed", () => logger.info("Window closed"))
 
   win.webContents.on("console-message", (event, level, message) => {
@@ -201,4 +213,40 @@ function getDeviceEmulationOverrides(deviceEmulation, windowBounds) {
     scale: getFitToViewRatio(deviceEmulation.bounds, windowBounds),
     mobile: deviceEmulation.isMobile || false,
   }
+}
+
+async function logCpuUsage(logger, repeatCount = 10) {
+  let currentUsage = process.cpuUsage()
+  let currentTime = process.hrtime()
+  for (let i = 0; i < repeatCount; i++) {
+    await delay(5000)
+    const numCpus = os.cpus().length
+
+    const usageDiff = process.cpuUsage(currentUsage)
+    const endTime = process.hrtime(currentTime)
+
+    currentUsage = process.cpuUsage()
+    currentTime = process.hrtime()
+
+    const usageMS = (usageDiff.user + usageDiff.system) / 1024
+    const totalMS = endTime[0] * 1024 + endTime[1] / 1024 / 1024
+
+    const cpuPercent = (usageMS / totalMS) * 100
+    const normPercent = (usageMS / totalMS / numCpus) * 100
+
+    logger.info("CPU Usage", {
+      cpuPercent: cpuPercent.toFixed(2),
+      normPercent: normPercent.toFixed(2),
+    })
+  }
+}
+
+function formatMemoryUsage(memoryUsageObject) {
+  return Object.fromEntries(
+    Object.entries(memoryUsageObject).map(([key, bytes]) => [key, `${toMegaBytes(bytes)} MB`])
+  )
+}
+
+function toMegaBytes(bytes) {
+  return (bytes / 1024 / 1024).toFixed(2)
 }
