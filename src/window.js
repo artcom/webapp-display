@@ -221,8 +221,8 @@ async function logCpuUsage(logger, repeatCount = 10) {
     await new Promise((resolve) => setTimeout(resolve, 5000))
     const numCpus = os.cpus().length
 
-    const usageDiff = process.cpuUsage(currentUsage) // get diff time from start
-    const endTime = process.hrtime(currentTime) // total amount of time that has elapsed
+    const usageDiff = process.cpuUsage(currentUsage)
+    const endTime = process.hrtime(currentTime)
 
     currentUsage = process.cpuUsage()
     currentTime = process.hrtime()
@@ -231,9 +231,9 @@ async function logCpuUsage(logger, repeatCount = 10) {
     const totalMS = endTime[0] * 1024 + endTime[1] / 1024 / 1024
 
     const cpuPercent = (usageMS / totalMS) * 100
-    const normPercent = (usageMS / totalMS / numCpus) * 100 // average usage time per cpu
+    const normPercent = (usageMS / totalMS / numCpus) * 100
 
-    logger.warn("CPU Usage", {
+    logger.info("CPU Usage", {
       cpuPercent: cpuPercent.toFixed(2),
       normPercent: normPercent.toFixed(2),
     })
