@@ -74,11 +74,11 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
 
   win.on("unresponsive", () => {
     logger.warn("The application has become unresponsive.", {
-      memoryUsage: formatMemoryUsage(process.memoryUsage()),
-      freemem: `${toMegaBytes(os.freemem())} MB`,
-      totalmem: `${toMegaBytes(os.totalmem())} MB`,
-      uptime: process.uptime(),
-      resourceUsage: process.resourceUsage(),
+      processMemoryUsage: formatMemoryUsage(process.memoryUsage()),
+      freeMemory: `${toMegaBytes(os.freemem())} MB`,
+      totalMemory: `${toMegaBytes(os.totalmem())} MB`,
+      upTime: process.uptime(),
+      processResourceUsage: process.resourceUsage(),
     })
     logCpuUsage(logger)
   })
