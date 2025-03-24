@@ -84,15 +84,15 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   })
   win.on("closed", () => logger.info("Window closed"))
 
-  win.webContents.on("console-message", (event, level, message) => {
+  win.webContents.on("console-message", ({ level, message }) => {
     switch (level) {
-      case 0:
+      case "debug":
         return logger.debug(message)
-      case 1:
+      case "info":
         return logger.info(message)
-      case 2:
+      case "warning":
         return logger.warn(message)
-      case 3:
+      case "error":
         return logger.error(message)
       default:
         return logger.info(message)
