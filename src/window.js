@@ -72,13 +72,16 @@ module.exports.createWindow = ({
 function setupEventHandler(win, url, logger, deviceEmulation) {
   win.on("page-title-updated", (event) => event.preventDefault())
 
-  win.on("unresponsive", () => {
+  win.on("unresponsive", async () => {
+    const callStack = await win.webContents.mainFrame.collectJavaScriptCallStack()
+
     logger.warn("The application has become unresponsive.", {
       processMemoryUsage: formatMemoryUsage(process.memoryUsage()),
       freeMemory: `${toMegaBytes(os.freemem())} MB`,
       totalMemory: `${toMegaBytes(os.totalmem())} MB`,
       upTime: process.uptime(),
       processResourceUsage: process.resourceUsage(),
+      callStack,
     })
     logCpuUsage(logger)
   })
@@ -167,6 +170,7 @@ function modifyResponseHeaders(session) {
     }
     modifiedHeaders["access-control-allow-headers"] = "*"
     modifiedHeaders["access-control-allow-methods"] = "*"
+    modifiedHeaders["document-policy"] = "include-js-call-stacks-in-crash-reports"
 
     const setCookies = modifiedHeaders["set-cookie"]
     if (setCookies) {

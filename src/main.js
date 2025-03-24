@@ -17,6 +17,10 @@ electron.app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-requir
 
 electron.app.commandLine.appendSwitch("touch-events", "enabled")
 electron.app.commandLine.appendSwitch("enable-features", "OverlayScrollbar")
+electron.app.commandLine.appendSwitch(
+  "enable-features",
+  "DocumentPolicyIncludeJSCallStacksInCrashReports"
+)
 
 electron.app.commandLine.appendSwitch("disable-site-isolation-trials")
 
