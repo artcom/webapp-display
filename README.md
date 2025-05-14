@@ -63,7 +63,7 @@ You can send mouse events to the topic `devices/<device>/doSendMouseEvent` to pr
 
 The payload should be a JSON object ([MouseInputEvent](https://www.electronjs.org/docs/latest/api/structures/mouse-input-event) extended by the 'mouseClick' type) with the following structure:
 
-```json
+```json5
 {
   "type": "mouseDown" | "mouseMove" | "mouseUp" | "mouseClick",
   "x": number,
