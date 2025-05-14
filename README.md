@@ -51,11 +51,39 @@ Logs are created in the path specified via the command line arguments. The log f
 
 ## Usage
 
-- Start the application with `npm start`
+Start the application with `npm start`
 
 ### Clear Cache via MQTT API
 
 The app subscribes to the topic `devices/<device>/doClearCacheAndRestart`. Messages on this topic cause the disk cache to be cleared and the app window to be restarted. The restart is necessary so that the memory cache is also discarded in addition to the deleted disk cache.
+
+### Mouse Events via MQTT API
+
+You can send mouse events to the topic `devices/<device>/doSendMouseEvent` to programmatically control mouse interactions:
+
+The payload should be a JSON object ([MouseInputEvent](https://www.electronjs.org/docs/latest/api/structures/mouse-input-event) extended by the 'mouseClick' type) with the following structure:
+
+```json
+{
+  "type": "mouseDown" | "mouseMove" | "mouseUp" | "mouseClick",
+  "x": number,
+  "y": number,
+  "button": "left" | "right" | "middle", // optional, defaults to "left"
+  "clickCount": number // optional, defaults to 1
+}
+```
+
+Example:
+
+```json
+{
+  "type": "mouseClick",
+  "x": 100,
+  "y": 200
+}
+```
+
+These events will be injected into the window as if a real mouse interaction occurred at those coordinates.
 
 ### Automatic Website Interactions
 

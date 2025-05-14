@@ -8,6 +8,8 @@ const { createWindow } = require("./window")
 const { WebpageInteractor, loadInteractions } = require("./interactions")
 
 const SERVICE_ID = "webappDisplay"
+// Store all created browser windows for event propagation
+const browserWindows = []
 
 electron.app.commandLine.appendSwitch("ignore-certificate-errors")
 
@@ -75,6 +77,14 @@ electron.app.on("ready", async () => {
 
       if (display) {
         let window = createWindow(windowOptions)
+        browserWindows.push(window)
+
+        window.on("closed", () => {
+          const index = browserWindows.indexOf(window)
+          if (index !== -1) {
+            browserWindows.splice(index, 1)
+          }
+        })
 
         electron.Menu.setApplicationMenu(createMenu())
         await createWebpageInteractor(data, queryConfig, window, logger)
@@ -84,8 +94,23 @@ electron.app.on("ready", async () => {
             logger.info("Cache cleared, Restarting...")
             window.close()
             window = createWindow(windowOptions)
+            browserWindows.push(window)
             await createWebpageInteractor(data, queryConfig, window, logger)
           })
+        })
+
+        mqttClient.subscribe(`${deviceTopic}/doSendMouseEvent`, (mouseInputEvent) => {
+          try {
+            logger.info("Received mouse event", mouseInputEvent)
+            if (mouseInputEvent.type === "mouseClick") {
+              sendInputEvent(window, { ...mouseInputEvent, type: "mouseDown" })
+              sendInputEvent(window, { ...mouseInputEvent, type: "mouseUp" })
+            } else {
+              sendInputEvent(window, mouseInputEvent)
+            }
+          } catch (error) {
+            logger.error(`Failed to process mouse event: ${error.message}`)
+          }
         })
       } else {
         logger.error(`No display found for display index ${displayIndex}.`)
@@ -123,5 +148,19 @@ function appendSuffix(baseName, suffix, divider = "-") {
 function appendParamIfNotPresent(searchParams, key, value) {
   if (!searchParams.has(key)) {
     searchParams.append(key, value)
+  }
+}
+
+function sendInputEvent(browserWindow, mouseInputEvent) {
+  try {
+    browserWindow.webContents.sendInputEvent({
+      type: mouseInputEvent.type,
+      x: mouseInputEvent.x,
+      y: mouseInputEvent.y,
+      button: mouseInputEvent.button || "left",
+      clickCount: mouseInputEvent.clickCount || 1,
+    })
+  } catch (error) {
+    logger.error(`Failed to inject mouse event: ${error.message}`)
   }
 }
