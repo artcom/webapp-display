@@ -65,6 +65,7 @@ module.exports.createWindow = ({
 
   logger.info(`Loading url: ${url}`)
   win.loadURL(url)
+  win.setSize(windowBounds.width, windowBounds.height)
 
   return win
 }
