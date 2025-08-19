@@ -6,6 +6,7 @@ const config = require("./options")
 const createMenu = require("./menu")
 const { createWindow } = require("./window")
 const { WebpageInteractor, loadInteractions } = require("./interactions")
+const { getDeviceEmulationOverrides } = require("./utils")
 
 const SERVICE_ID = "webappDisplay"
 // Store all created browser windows for event propagation
@@ -103,10 +104,10 @@ electron.app.on("ready", async () => {
           try {
             logger.info("Received mouse event", mouseInputEvent)
             if (mouseInputEvent.type === "mouseClick") {
-              sendInputEvent(window, { ...mouseInputEvent, type: "mouseDown" })
-              sendInputEvent(window, { ...mouseInputEvent, type: "mouseUp" })
+              sendInputEvent(window, deviceEmulation, { ...mouseInputEvent, type: "mouseDown" })
+              sendInputEvent(window, deviceEmulation, { ...mouseInputEvent, type: "mouseUp" })
             } else {
-              sendInputEvent(window, mouseInputEvent)
+              sendInputEvent(window, deviceEmulation, mouseInputEvent)
             }
           } catch (error) {
             logger.error(`Failed to process mouse event: ${error.message}`)
@@ -151,12 +152,16 @@ function appendParamIfNotPresent(searchParams, key, value) {
   }
 }
 
-function sendInputEvent(browserWindow, mouseInputEvent) {
+async function sendInputEvent(browserWindow, deviceEmulation, mouseInputEvent) {
   try {
+    const scale = deviceEmulation
+      ? getDeviceEmulationOverrides(deviceEmulation, browserWindow.getBounds()).scale
+      : 1
+
     browserWindow.webContents.sendInputEvent({
       type: mouseInputEvent.type,
-      x: mouseInputEvent.x,
-      y: mouseInputEvent.y,
+      x: mouseInputEvent.x * scale,
+      y: mouseInputEvent.y * scale,
       button: mouseInputEvent.button || "left",
       clickCount: mouseInputEvent.clickCount || 1,
     })
