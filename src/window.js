@@ -91,22 +91,8 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
     })
     logCpuUsage(logger)
   })
-  win.on("closed", () => logger.info("Window closed"))
 
-  win.webContents.on("console-message", ({ level, message }) => {
-    switch (level) {
-      case "debug":
-        return logger.debug(message)
-      case "info":
-        return logger.info(message)
-      case "warning":
-        return logger.warn(message)
-      case "error":
-        return logger.error(message)
-      default:
-        return logger.info(message)
-    }
-  })
+  win.on("closed", () => logger.info("Window closed"))
 
   win.webContents.on("render-process-gone", (event, details) =>
     logger.info(`Render process gone, reason: ${details.reason}`)
