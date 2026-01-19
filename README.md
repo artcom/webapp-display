@@ -87,7 +87,7 @@ These events will be injected into the window as if a real mouse interaction occ
 
 ### Automatic Website Interactions
 
-Some websites require login credentials or cookie accecption (cookie banner). These interactions can be automated with an interaction configuration.
+Some websites require login credentials or cookie acceptance (cookie banner). These interactions can be automated with an interaction configuration.
 examples:
 
 ```
