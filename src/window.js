@@ -98,6 +98,68 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
     logger.info(`Render process gone, reason: ${details.reason}`)
   )
 
+  // Attach debugger
+  try {
+    win.webContents.debugger.attach("1.3")
+  } catch (err) {
+    logger.info("Debugger attach failed:", err)
+  }
+
+  win.webContents.debugger.on("detach", (event, reason) => {
+    logger.info("Debugger detached due to:", reason)
+  })
+
+  // Listen for console messages from ALL contexts (including iframes)
+  win.webContents.debugger.on("message", async (event, method, params) => {
+    if (method === "Runtime.consoleAPICalled") {
+      const { type, args } = params
+
+      const serializedArgs = await Promise.all(
+        args.map(async (arg) => {
+          // Simple values come through directly
+          if (arg.value !== undefined) {
+            return arg.value
+          }
+
+          // Complex objects need to be fetched
+          if (arg.objectId) {
+            try {
+              const { result } = await win.webContents.debugger.sendCommand(
+                "Runtime.getProperties",
+                {
+                  objectId: arg.objectId,
+                  ownProperties: true,
+                  generatePreview: true,
+                }
+              )
+
+              // Convert properties array to an object
+              const obj = {}
+              for (const prop of result) {
+                if (prop.value) {
+                  obj[prop.name] =
+                    prop.value.value !== undefined ? prop.value.value : prop.value.description
+                }
+              }
+              return obj
+            } catch (err) {
+              return `[${arg.className || arg.type}]`
+            }
+          }
+
+          return arg.description || String(arg)
+        })
+      )
+      if (type === "log") {
+        logger.info(`debugger message :`, { serializedArgs, args })
+      }
+    }
+  })
+
+  // Enable Runtime and Console domains
+  win.webContents.debugger.sendCommand("Runtime.enable")
+  win.webContents.debugger.sendCommand("Console.enable")
+
   if (deviceEmulation) {
     if (deviceEmulation.enforceAspectRatio) {
       const aspectRatio = deviceEmulation.bounds.width / deviceEmulation.bounds.height
@@ -109,23 +171,17 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
     }
 
     // Use Chrome DevTools Protocol (https://chromedevtools.github.io/devtools-protocol/)
-    win.webContents.on("dom-ready", () => {
-      try {
-        win.webContents.debugger.attach()
-        win.webContents.debugger.sendCommand(
-          "Emulation.setDeviceMetricsOverride",
-          getDeviceEmulationOverrides(deviceEmulation, win.getBounds())
-        )
-        win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {
-          enabled: true,
-        })
-        win.webContents.debugger.sendCommand("Emulation.setEmitTouchEventsForMouse", {
-          enabled: true,
-          configuration: "mobile",
-        })
-      } catch (err) {
-        logger.warn("Debugger attach failed : ", err)
-      }
+
+    win.webContents.debugger.sendCommand(
+      "Emulation.setDeviceMetricsOverride",
+      getDeviceEmulationOverrides(deviceEmulation, win.getBounds())
+    )
+    win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {
+      enabled: true,
+    })
+    win.webContents.debugger.sendCommand("Emulation.setEmitTouchEventsForMouse", {
+      enabled: true,
+      configuration: "mobile",
     })
 
     win.on("resized", () => {

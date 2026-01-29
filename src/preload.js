@@ -2,17 +2,31 @@ const { webFrame, ipcRenderer } = require("electron")
 
 webFrame.setVisualZoomLevelLimits(1, 1)
 
+// Store original console methods before overriding
+const originalConsole = {
+  log: console.log,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  debug: console.debug,
+}
+
 const logLevels = ["log", "info", "warn", "error", "debug"]
 logLevels.forEach((level) => {
-  const original = console[level]
-
   console[level] = (...args) => {
-    ipcRenderer.send("renderer-console", {
-      level,
-      message: args.map(serialize),
-    })
+    try {
+      ipcRenderer.send("renderer-console", {
+        level,
+        message: args.map(serialize),
+        fromPreload: true,
+      })
+    } catch (e) {
+      // If IPC fails, use original console to avoid losing the message
+      originalConsole[level]("IPC logging failed:", e)
+    }
 
-    original.apply(console, args)
+    // Call original to maintain normal console behavior (appears in DevTools)
+    originalConsole[level].apply(console, args)
   }
 })
 

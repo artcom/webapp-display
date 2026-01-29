@@ -128,25 +128,6 @@ electron.app.on("ready", async () => {
       process.exit()
     }
   })
-
-  electron.ipcMain.on("renderer-console", (_, { level, message }) => {
-    switch (level) {
-      case "debug":
-        logger.debug(message)
-        break
-      case "info":
-        logger.info(message)
-        break
-      case "warn":
-        logger.warn(message)
-        break
-      case "error":
-        logger.error(message)
-        break
-      default:
-        logger.info(message)
-    }
-  })
 })
 
 electron.app.on("window-all-closed", () => {
