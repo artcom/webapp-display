@@ -150,9 +150,7 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
           return arg.description || String(arg)
         })
       )
-      if (type === "log") {
-        logger.info(`debugger message :`, { serializedArgs, args })
-      }
+      logger[type](serializedArgs)
     }
   })
 
