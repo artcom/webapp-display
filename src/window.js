@@ -104,12 +104,11 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
     logger.info("Debugger attach failed:", err)
   }
 
-  win.webContents.debugger.on("detach", (event, reason) => {
+  win.webContents.debugger.on("detach", (_, reason) => {
     logger.info("Debugger detached due to:", reason)
   })
 
-  // Listen for console messages from ALL contexts (including iframes)
-  win.webContents.debugger.on("message", async (event, method, params) => {
+  win.webContents.debugger.on("message", async (_, method, params) => {
     if (method === "Runtime.consoleAPICalled") {
       const { type, args } = params
 
