@@ -145,7 +145,10 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
           return arg.description || String(arg)
         })
       )
-      logger[type](serializedArgs)
+      // Chrome DevTools Protocol uses "warning" for console.warn, but logger expects "warn"
+      const level = type === "warning" ? "warn" : type
+      const logMethod = logger[level] || logger.info
+      logMethod(serializedArgs)
     }
   })
 
