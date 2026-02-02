@@ -76,6 +76,12 @@ module.exports.createWindow = ({
 }
 
 function setupEventHandler(win, url, logger, deviceEmulation) {
+  try {
+    win.webContents.debugger.attach("1.3")
+  } catch (err) {
+    logger.error("Debugger attach failed:", err)
+  }
+
   win.on("page-title-updated", (event) => event.preventDefault())
 
   win.on("unresponsive", async () => {
@@ -98,12 +104,6 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
     logger.info(`Render process gone, reason: ${details.reason}`)
   )
 
-  try {
-    win.webContents.debugger.attach("1.3")
-  } catch (err) {
-    logger.error("Debugger attach failed:", err)
-  }
-
   win.webContents.debugger.on("detach", (_, reason) => {
     logger.info("Debugger detached due to:", reason)
   })
@@ -111,7 +111,6 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   win.webContents.debugger.on("message", async (_, method, params) => {
     if (method === "Runtime.consoleAPICalled") {
       const { type, args } = params
-
       const serializedArgs = await Promise.all(
         args.map(async (arg) => {
           if (arg.value !== undefined) {
