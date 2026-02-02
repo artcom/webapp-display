@@ -94,11 +94,10 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
 
   win.on("closed", () => logger.info("Window closed"))
 
-  win.webContents.on("render-process-gone", (event, details) =>
+  win.webContents.on("render-process-gone", (_, details) =>
     logger.info(`Render process gone, reason: ${details.reason}`)
   )
 
-  // Attach debugger
   try {
     win.webContents.debugger.attach("1.3")
   } catch (err) {
@@ -116,12 +115,10 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
 
       const serializedArgs = await Promise.all(
         args.map(async (arg) => {
-          // Simple values come through directly
           if (arg.value !== undefined) {
             return arg.value
           }
 
-          // Complex objects need to be fetched
           if (arg.objectId) {
             try {
               const { result } = await win.webContents.debugger.sendCommand(
@@ -133,7 +130,6 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
                 }
               )
 
-              // Convert properties array to an object
               const obj = {}
               for (const prop of result) {
                 if (prop.value) {
@@ -154,7 +150,6 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
     }
   })
 
-  // Enable Runtime and Console domains
   win.webContents.debugger.sendCommand("Runtime.enable")
   win.webContents.debugger.sendCommand("Console.enable")
 
