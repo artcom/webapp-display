@@ -101,7 +101,7 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   try {
     win.webContents.debugger.attach("1.3")
   } catch (err) {
-    logger.info("Debugger attach failed:", err)
+    logger.error("Debugger attach failed:", err)
   }
 
   win.webContents.debugger.on("detach", (_, reason) => {
