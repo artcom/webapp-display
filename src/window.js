@@ -78,6 +78,100 @@ module.exports.createWindow = ({
 function setupEventHandler(win, url, logger, deviceEmulation) {
   try {
     win.webContents.debugger.attach("1.3")
+
+    win.webContents.debugger.on("detach", (_, reason) => {
+      logger.info("Debugger detached due to:", reason)
+    })
+
+    win.webContents.debugger.on("message", async (_, method, params) => {
+      if (method === "Runtime.consoleAPICalled") {
+        const { type, args } = params
+        const serializedArgs = await Promise.all(
+          args.map(async (arg) => {
+            if (arg.value !== undefined) {
+              return arg.value
+            }
+
+            if (arg.objectId) {
+              try {
+                const { result } = await win.webContents.debugger.sendCommand(
+                  "Runtime.getProperties",
+                  {
+                    objectId: arg.objectId,
+                    ownProperties: true,
+                    generatePreview: true,
+                  }
+                )
+
+                const obj = {}
+                for (const prop of result) {
+                  if (prop.value) {
+                    obj[prop.name] =
+                      prop.value.value !== undefined ? prop.value.value : prop.value.description
+                  }
+                }
+                return obj
+              } catch (err) {
+                return `[${arg.className || arg.type}]`
+              }
+            }
+
+            return arg.description || String(arg)
+          })
+        )
+        switch (type) {
+          case "log":
+            logger.info(serializedArgs)
+            break
+          case "warning":
+            logger.warn(serializedArgs)
+            break
+          case "error":
+            logger.error(serializedArgs)
+            break
+          case "debug":
+            logger.debug(serializedArgs)
+            break
+          default:
+            logger.info(serializedArgs)
+        }
+      }
+    })
+
+    win.webContents.debugger.sendCommand("Runtime.enable")
+    win.webContents.debugger.sendCommand("Console.enable")
+
+    if (deviceEmulation) {
+      if (deviceEmulation.enforceAspectRatio) {
+        const aspectRatio = deviceEmulation.bounds.width / deviceEmulation.bounds.height
+        win.setAspectRatio(aspectRatio)
+
+        const { width, height } = win.getBounds()
+        const shortSide = Math.min(width, height)
+        win.setSize(Math.round(shortSide * aspectRatio), shortSide)
+      }
+
+      // Use Chrome DevTools Protocol (https://chromedevtools.github.io/devtools-protocol/)
+
+      win.webContents.debugger.sendCommand(
+        "Emulation.setDeviceMetricsOverride",
+        getDeviceEmulationOverrides(deviceEmulation, win.getBounds())
+      )
+      win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {
+        enabled: true,
+      })
+      win.webContents.debugger.sendCommand("Emulation.setEmitTouchEventsForMouse", {
+        enabled: true,
+        configuration: "mobile",
+      })
+
+      win.on("resized", () => {
+        win.webContents.debugger.sendCommand(
+          "Emulation.setDeviceMetricsOverride",
+          getDeviceEmulationOverrides(deviceEmulation, win.getBounds())
+        )
+      })
+    }
   } catch (err) {
     logger.error("Debugger attach failed:", err)
   }
@@ -103,88 +197,6 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
   win.webContents.on("render-process-gone", (_, details) =>
     logger.info(`Render process gone, reason: ${details.reason}`)
   )
-
-  win.webContents.debugger.on("detach", (_, reason) => {
-    logger.info("Debugger detached due to:", reason)
-  })
-
-  win.webContents.debugger.on("message", async (_, method, params) => {
-    if (method === "Runtime.consoleAPICalled") {
-      const { type, args } = params
-      const serializedArgs = await Promise.all(
-        args.map(async (arg) => {
-          if (arg.value !== undefined) {
-            return arg.value
-          }
-
-          if (arg.objectId) {
-            try {
-              const { result } = await win.webContents.debugger.sendCommand(
-                "Runtime.getProperties",
-                {
-                  objectId: arg.objectId,
-                  ownProperties: true,
-                  generatePreview: true,
-                }
-              )
-
-              const obj = {}
-              for (const prop of result) {
-                if (prop.value) {
-                  obj[prop.name] =
-                    prop.value.value !== undefined ? prop.value.value : prop.value.description
-                }
-              }
-              return obj
-            } catch (err) {
-              return `[${arg.className || arg.type}]`
-            }
-          }
-
-          return arg.description || String(arg)
-        })
-      )
-      // Chrome DevTools Protocol uses "warning" for console.warn, but logger expects "warn"
-      const level = type === "warning" ? "warn" : type
-      const logMethod = logger[level] || logger.info
-      logMethod(serializedArgs)
-    }
-  })
-
-  win.webContents.debugger.sendCommand("Runtime.enable")
-  win.webContents.debugger.sendCommand("Console.enable")
-
-  if (deviceEmulation) {
-    if (deviceEmulation.enforceAspectRatio) {
-      const aspectRatio = deviceEmulation.bounds.width / deviceEmulation.bounds.height
-      win.setAspectRatio(aspectRatio)
-
-      const { width, height } = win.getBounds()
-      const shortSide = Math.min(width, height)
-      win.setSize(Math.round(shortSide * aspectRatio), shortSide)
-    }
-
-    // Use Chrome DevTools Protocol (https://chromedevtools.github.io/devtools-protocol/)
-
-    win.webContents.debugger.sendCommand(
-      "Emulation.setDeviceMetricsOverride",
-      getDeviceEmulationOverrides(deviceEmulation, win.getBounds())
-    )
-    win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {
-      enabled: true,
-    })
-    win.webContents.debugger.sendCommand("Emulation.setEmitTouchEventsForMouse", {
-      enabled: true,
-      configuration: "mobile",
-    })
-
-    win.on("resized", () => {
-      win.webContents.debugger.sendCommand(
-        "Emulation.setDeviceMetricsOverride",
-        getDeviceEmulationOverrides(deviceEmulation, win.getBounds())
-      )
-    })
-  }
 
   win.webContents.on("did-fail-load", (event, code, description, validatedUrl) => {
     logger.info(`Load failed: ${validatedUrl}\nDescription: ${description}\nError Code: ${code}`)
