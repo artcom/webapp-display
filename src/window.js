@@ -112,11 +112,25 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
                 }
                 return obj
               } catch (err) {
-                return `[${arg.className || arg.type}]`
+                // Fallback: try JSON.stringify via debugger
+                try {
+                  const { result } = await win.webContents.debugger.sendCommand(
+                    "Runtime.callFunctionOn",
+                    {
+                      objectId: arg.objectId,
+                      functionDeclaration:
+                        "function() { try { return JSON.stringify(this); } catch (err) { return '[Circular or Non-serializable Object]'; } }",
+                      returnByValue: true,
+                    }
+                  )
+                  return result.value || `[${arg.className || arg.type}]`
+                } catch (err) {
+                  return `[${arg.className || arg.type}]`
+                }
               }
             }
 
-            return arg.description || String(arg)
+            return arg.description || (arg.type ? `[${arg.type}]` : "[unknown]")
           })
         )
         switch (type) {
