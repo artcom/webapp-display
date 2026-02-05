@@ -92,42 +92,42 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
               return arg.value
             }
 
+            // Complex objects: try to serialize with JSON.stringify first (gets full depth)
             if (arg.objectId) {
               try {
                 const { result } = await win.webContents.debugger.sendCommand(
-                  "Runtime.getProperties",
+                  "Runtime.callFunctionOn",
                   {
                     objectId: arg.objectId,
-                    ownProperties: true,
-                    generatePreview: true,
+                    functionDeclaration: function () {
+                      try {
+                        return JSON.stringify(this)
+                      } catch (err) {
+                        return "[Circular or Non-serializable Object]"
+                      }
+                    }.toString(),
+                    returnByValue: true,
                   }
                 )
-
-                const obj = {}
-                for (const prop of result) {
-                  if (prop.value) {
-                    obj[prop.name] =
-                      prop.value.value !== undefined ? prop.value.value : prop.value.description
+                if (result.value) {
+                  try {
+                    return JSON.parse(result.value)
+                  } catch (err) {
+                    logger.debug("Failed to parse console argument, returning raw string", err)
+                    return result.value
                   }
                 }
-                return obj
               } catch (err) {
-                // Fallback: try JSON.stringify via debugger
-                try {
-                  const { result } = await win.webContents.debugger.sendCommand(
-                    "Runtime.callFunctionOn",
-                    {
-                      objectId: arg.objectId,
-                      functionDeclaration:
-                        "function() { try { return JSON.stringify(this); } catch (err) { return '[Circular or Non-serializable Object]'; } }",
-                      returnByValue: true,
-                    }
-                  )
-                  return result.value || `[${arg.className || arg.type}]`
-                } catch (err) {
-                  return `[${arg.className || arg.type}]`
+                // ObjectId expired, fall back to preview if available
+                if (arg.preview && arg.preview.properties) {
+                  const obj = {}
+                  for (const prop of arg.preview.properties) {
+                    obj[prop.name] = prop.value !== undefined ? prop.value : `[${prop.type}]`
+                  }
+                  return obj
                 }
               }
+              return `[${arg.className || arg.type}]`
             }
 
             return arg.description || (arg.type ? `[${arg.type}]` : "[unknown]")
