@@ -76,8 +76,12 @@ module.exports.createWindow = ({
 }
 
 function setupEventHandler(win, url, logger, deviceEmulation) {
+  // Use Chrome DevTools Protocol (https://chromedevtools.github.io/devtools-protocol/)
+
   try {
     win.webContents.debugger.attach("1.3")
+    win.webContents.debugger.sendCommand("Runtime.enable")
+    win.webContents.debugger.sendCommand("Console.enable")
 
     win.webContents.debugger.on("detach", (_, reason) => {
       logger.info("Debugger detached due to:", reason)
@@ -135,25 +139,18 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
         )
         switch (type) {
           case "log":
-            logger.info(serializedArgs)
-            break
+            return logger.info(serializedArgs)
           case "warning":
-            logger.warn(serializedArgs)
-            break
+            return logger.warn(serializedArgs)
           case "error":
-            logger.error(serializedArgs)
-            break
+            return logger.error(serializedArgs)
           case "debug":
-            logger.debug(serializedArgs)
-            break
+            return logger.debug(serializedArgs)
           default:
-            logger.info(serializedArgs)
+            return logger.info(serializedArgs)
         }
       }
     })
-
-    win.webContents.debugger.sendCommand("Runtime.enable")
-    win.webContents.debugger.sendCommand("Console.enable")
 
     if (deviceEmulation) {
       if (deviceEmulation.enforceAspectRatio) {
@@ -164,8 +161,6 @@ function setupEventHandler(win, url, logger, deviceEmulation) {
         const shortSide = Math.min(width, height)
         win.setSize(Math.round(shortSide * aspectRatio), shortSide)
       }
-
-      // Use Chrome DevTools Protocol (https://chromedevtools.github.io/devtools-protocol/)
 
       win.webContents.debugger.sendCommand(
         "Emulation.setDeviceMetricsOverride",
