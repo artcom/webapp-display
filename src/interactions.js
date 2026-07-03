@@ -15,57 +15,78 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     this.webContents.session.webRequest.onCompleted(async (details) => {
       const url = details.url.split("?")[0]
 
-      const interactions = this.interactionData[url]
+      const testInteractionData = {
+        "https://my.fuerstenberg-institut.de/en/login/": [
+          {
+            selector: '[data-testid="uc-accept-all-button"]',
+          },
+          {
+            selector: "[type=email]",
+            input: "m.reuter@telekom.de",
+          },
+          {
+            selector: "[type=password]",
+            input: "Technologie_02",
+          },
+          {
+            selector: "[type=submit]",
+          },
+        ],
+      }
 
-      if (interactions) {
-        try {
-          for (const interaction of interactions) {
-            await delay(interaction.delay || 0)
+      const interactions = testInteractionData[url]
 
-            if (interaction.input) {
-              this.logger.info(`Try to fill element ${interaction.selector}`)
+      if (!interactions) return
 
-              for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
-                if (await this.fillCredential(url, interaction)) {
-                  this.logger.info(`Filled: ${interaction.selector}`)
-                  break
-                }
-                await delay(RETRY_TIMEOUT)
-              }
-            } else {
-              this.logger.info(`Try to click element ${interaction.selector}`)
+      try {
+        for (const interaction of interactions) {
+          await delay(interaction.delay || 0)
 
-              for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
-                if (await this.clickOn(url, interaction.selector, interaction.index)) {
-                  this.logger.info(`Clicked: ${interaction.selector}`)
-                  break
-                }
-                await delay(RETRY_TIMEOUT)
-              }
-            }
+          if (interaction.input) {
+            await this.performInputFillWithRetry(url, interaction)
+          } else {
+            await this.performClickWithRetry(url, interaction)
           }
-          this.logger.info(`Did all interactions`)
-        } catch (error) {
-          this.logger.info(`Could not perform all interactions because: ${error}`)
         }
+        this.logger.info(`Did all interactions`)
+      } catch (error) {
+        this.logger.info(`Could not perform all interactions because: ${error}`)
       }
     })
   }
 
-  async fillCredential(url, interaction) {
-    if (await this.fillInput(url, interaction)) {
-      await delay(100)
-      return true
-    }
+  async performInputFillWithRetry(url, interaction) {
+    this.logger.info(`Try to fill element ${interaction.selector}`)
 
-    return false
+    for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
+      if (await this.fillInput(url, interaction)) {
+        this.logger.info(`Filled: ${interaction.selector}`)
+        return
+      }
+      await delay(RETRY_TIMEOUT)
+    }
+  }
+
+  async performClickWithRetry(url, interaction) {
+    this.logger.info(`Try to click element ${interaction.selector}`)
+
+    for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
+      if (await this.clickOn(url, interaction.selector, interaction.index)) {
+        this.logger.info(`Clicked: ${interaction.selector}`)
+        return
+      }
+      await delay(RETRY_TIMEOUT)
+    }
   }
 
   async fillInput(url, { selector, input }) {
-    const cmd = `${deepQuerySelectorAll.toString()};${setInputValue.toString()};setInputValue(${JSON.stringify(
-      url
-    )}, ${JSON.stringify(selector)}, ${JSON.stringify(input)});`
-    const filled = await this.webContents.executeJavaScript(cmd, false)
+    const filled = await this.executeInBrowserContext(
+      "setInputValue",
+      url,
+      selector,
+      input
+    )
+
     if (filled) {
       this.logger.info(`Filled ${selector} with: ${input.substring(0, 3)}...`)
       return true
@@ -76,79 +97,117 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   }
 
   async clickOn(url, selector, index = 0) {
-    const cmd = `${deepQuerySelectorAll.toString()};${getElementCenter.toString()};getElementCenter(${JSON.stringify(
-      url
-    )}, ${JSON.stringify(selector)}, ${JSON.stringify(index)});`
-    const center = await this.webContents.executeJavaScript(cmd, false)
+    const center = await this.executeInBrowserContext(
+      "getElementCenter",
+      url,
+      selector,
+      index
+    )
 
     if (center) {
-      const options = { button: "left", x: center[0], y: center[1], clickCount: 1 }
-
-      this.webContents.sendInputEvent({
-        type: "mouseDown",
-        ...options,
-      })
-      this.webContents.sendInputEvent({
-        type: "mouseUp",
-        ...options,
-      })
+      this.sendMouseClick(center)
       return true
-    } else {
-      this.logger.info(
-        `clickOn(${url}, ${selector}) did not find element: ${JSON.stringify(center)}`
+    }
+
+    this.logger.info(
+      `clickOn(${url}, ${selector}) did not find element: ${JSON.stringify(center)}`
+    )
+    return false
+  }
+
+  sendMouseClick(centerCoordinates) {
+    const options = {
+      button: "left",
+      x: centerCoordinates[0],
+      y: centerCoordinates[1],
+      clickCount: 1,
+    }
+
+    this.webContents.sendInputEvent({
+      type: "mouseDown",
+      ...options,
+    })
+    this.webContents.sendInputEvent({
+      type: "mouseUp",
+      ...options,
+    })
+  }
+
+  executeInBrowserContext(functionName, ...functionArguments) {
+    const serializedArguments = functionArguments
+      .map(argument => JSON.stringify(argument))
+      .join(", ")
+
+    const helperFunctions = `
+      ${findElementsInDomTree.toString()};
+      ${setInputValue.toString()};
+      ${getElementCenter.toString()};
+    `
+
+    const javascriptCode = `${helperFunctions}${functionName}(${serializedArguments});`
+
+    return this.webContents.executeJavaScript(javascriptCode, false)
+  }
+}
+
+// ============================================================================
+// Browser-side functions (executed in renderer process via Electron)
+// ============================================================================
+
+function findElementsInDomTree(rootElement, elementSelector) {
+  const matchedElements = [...rootElement.querySelectorAll(elementSelector)]
+
+  const allElements = rootElement.querySelectorAll("*")
+  for (const currentElement of allElements) {
+    if (currentElement.shadowRoot) {
+      matchedElements.push(
+        ...findElementsInDomTree(currentElement.shadowRoot, elementSelector)
       )
-      return false
-    }
-  }
-}
-
-function deepQuerySelectorAll(root, selector) {
-  const results = [...root.querySelectorAll(selector)]
-
-  const all = root.querySelectorAll("*")
-  for (const el of all) {
-    if (el.shadowRoot) {
-      results.push(...deepQuerySelectorAll(el.shadowRoot, selector))
     }
   }
 
-  return results
+  return matchedElements
 }
 
-function setInputValue(url, selector, value) {
-  if (document.location.href.split("?")[0] === url) {
-    const stats = { shadowHosts: [] }
-    const elements = deepQuerySelectorAll(document, selector, stats)
-    const element = elements[0]
+function setInputValue(targetUrl, elementSelector, inputValue) {
+  const currentPageUrl = document.location.href.split("?")[0]
 
-    if (element && element.tagName.match(/INPUT|TEXTAREA/i)) {
-      element.value = value
-      element.dispatchEvent(new Event("input", { bubbles: true }))
-      element.dispatchEvent(new Event("change", { bubbles: true }))
+  if (currentPageUrl === targetUrl) {
+    const matchedElements = findElementsInDomTree(document, elementSelector)
+    const targetElement = matchedElements[0]
+
+    if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
+      targetElement.value = inputValue
+      targetElement.dispatchEvent(new Event("input", { bubbles: true }))
+      targetElement.dispatchEvent(new Event("change", { bubbles: true }))
       return true
     }
     return false
   }
 
-  const iframes = document.getElementsByTagName("iframe")
-  for (const iframe of iframes) {
-    let currentUrl
+  const pageIframes = document.getElementsByTagName("iframe")
+  for (const iframe of pageIframes) {
+    let iframeUrl
     try {
-      currentUrl = iframe.contentWindow.location.href.split("?")[0]
+      iframeUrl = iframe.contentWindow.location.href.split("?")[0]
     } catch (error) {
-      currentUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
+      iframeUrl = iframe.getAttribute("src")
+        ? iframe.getAttribute("src").split("?")[0]
+        : null
     }
 
-    if (currentUrl === url) {
+    if (iframeUrl === targetUrl) {
       try {
-        const stats = { shadowHosts: [] }
-        const elements = deepQuerySelectorAll(iframe.contentDocument, selector, stats)
-        const element = elements[0]
+        const matchedElements = findElementsInDomTree(
+          iframe.contentDocument,
+          elementSelector
+        )
+        const targetElement = matchedElements[0]
 
-        if (element && element.tagName.match(/INPUT|TEXTAREA/i)) {
-          element.value = value
-          element.dispatchEvent(new Event("input", { bubbles: true }))
-          element.dispatchEvent(new Event("change", { bubbles: true }))
+        if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
+          targetElement.value = inputValue
+          targetElement.dispatchEvent(new Event("input", { bubbles: true }))
+          targetElement.dispatchEvent(new Event("change", { bubbles: true }))
           return true
         }
       } catch (error) {
@@ -159,28 +218,41 @@ function setInputValue(url, selector, value) {
   return false
 }
 
-function getElementCenter(url, selector, index, root = document, parentOffset = [0, 0]) {
-  const iframes = root.getElementsByTagName("iframe")
-  for (const iframe of iframes) {
-    const iframeOffset = [
+function getElementCenter(
+  targetUrl,
+  elementSelector,
+  elementIndex,
+  rootElement = document,
+  parentOffset = [0, 0]
+) {
+  const pageIframes = rootElement.getElementsByTagName("iframe")
+
+  for (const iframe of pageIframes) {
+    const iframeOffsetFromParent = [
       parentOffset[0] + iframe.getBoundingClientRect().left,
       parentOffset[1] + iframe.getBoundingClientRect().top,
     ]
 
     const iframeUrl = iframe.getAttribute("src").split("?")[0]
 
-    if (iframeUrl === url) {
-      const elements = deepQuerySelectorAll(iframe.contentDocument, selector)
-      const element = elements[index]
+    if (iframeUrl === targetUrl) {
+      const matchedElements = findElementsInDomTree(
+        iframe.contentDocument,
+        elementSelector
+      )
+      const targetElement = matchedElements[elementIndex]
 
-      if (element) {
-        const { left, right, top, bottom } = element.getBoundingClientRect()
-        return [(left + right) / 2 + iframeOffset[0], (top + bottom) / 2 + iframeOffset[1]]
+      if (targetElement) {
+        const { left, right, top, bottom } = targetElement.getBoundingClientRect()
+        const centerX = (left + right) / 2 + iframeOffsetFromParent[0]
+        const centerY = (top + bottom) / 2 + iframeOffsetFromParent[1]
+        return [centerX, centerY]
       } else {
         return null
       }
     }
   }
+
   return null
 }
 
