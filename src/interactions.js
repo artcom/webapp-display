@@ -62,16 +62,23 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   }
 
   async fillInput(url, { selector, input }) {
-    if (await this.clickOn(url, selector)) {
-      this.typeWord(input)
+    const cmd = `${deepQuerySelectorAll.toString()};${setInputValue.toString()};setInputValue(${JSON.stringify(
+      url
+    )}, ${JSON.stringify(selector)}, ${JSON.stringify(input)});`
+    const filled = await this.webContents.executeJavaScript(cmd, false)
+    if (filled) {
+      this.logger.info(`Filled ${selector} with: ${input.substring(0, 3)}...`)
       return true
     }
 
+    this.logger.info(`Failed to fill ${selector}`)
     return false
   }
 
   async clickOn(url, selector, index = 0) {
-    const cmd = `${getElementCenter.toString()};getElementCenter("${url}", "${selector}", "${index}");`
+    const cmd = `${deepQuerySelectorAll.toString()};${getElementCenter.toString()};getElementCenter(${JSON.stringify(
+      url
+    )}, ${JSON.stringify(selector)}, ${JSON.stringify(index)});`
     const center = await this.webContents.executeJavaScript(cmd, false)
 
     if (center) {
@@ -87,13 +94,10 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       })
       return true
     } else {
+      this.logger.info(
+        `clickOn(${url}, ${selector}) did not find element: ${JSON.stringify(center)}`
+      )
       return false
-    }
-  }
-
-  typeWord(text) {
-    for (const char of text) {
-      this.webContents.sendInputEvent({ keyCode: char, type: "char" })
     }
   }
 }
@@ -109,6 +113,50 @@ function deepQuerySelectorAll(root, selector) {
   }
 
   return results
+}
+
+function setInputValue(url, selector, value) {
+  if (document.location.href.split("?")[0] === url) {
+    const stats = { shadowHosts: [] }
+    const elements = deepQuerySelectorAll(document, selector, stats)
+    const element = elements[0]
+
+    if (element && element.tagName.match(/INPUT|TEXTAREA/i)) {
+      element.value = value
+      element.dispatchEvent(new Event("input", { bubbles: true }))
+      element.dispatchEvent(new Event("change", { bubbles: true }))
+      return true
+    }
+    return false
+  }
+
+  const iframes = document.getElementsByTagName("iframe")
+  for (const iframe of iframes) {
+    let currentUrl
+    try {
+      currentUrl = iframe.contentWindow.location.href.split("?")[0]
+    } catch (error) {
+      currentUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
+    }
+
+    if (currentUrl === url) {
+      try {
+        const stats = { shadowHosts: [] }
+        const elements = deepQuerySelectorAll(iframe.contentDocument, selector, stats)
+        const element = elements[0]
+
+        if (element && element.tagName.match(/INPUT|TEXTAREA/i)) {
+          element.value = value
+          element.dispatchEvent(new Event("input", { bubbles: true }))
+          element.dispatchEvent(new Event("change", { bubbles: true }))
+          return true
+        }
+      } catch (error) {
+        return false
+      }
+    }
+  }
+  return false
 }
 
 function getElementCenter(url, selector, index, root = document, parentOffset = [0, 0]) {
