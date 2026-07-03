@@ -98,6 +98,19 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   }
 }
 
+function deepQuerySelectorAll(root, selector) {
+  const results = [...root.querySelectorAll(selector)]
+
+  const all = root.querySelectorAll("*")
+  for (const el of all) {
+    if (el.shadowRoot) {
+      results.push(...deepQuerySelectorAll(el.shadowRoot, selector))
+    }
+  }
+
+  return results
+}
+
 function getElementCenter(url, selector, index, root = document, parentOffset = [0, 0]) {
   const iframes = root.getElementsByTagName("iframe")
   for (const iframe of iframes) {
@@ -109,7 +122,7 @@ function getElementCenter(url, selector, index, root = document, parentOffset = 
     const iframeUrl = iframe.getAttribute("src").split("?")[0]
 
     if (iframeUrl === url) {
-      const elements = iframe.contentDocument.querySelectorAll(selector)
+      const elements = deepQuerySelectorAll(iframe.contentDocument, selector)
       const element = elements[index]
 
       if (element) {
