@@ -21,6 +21,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
             selector: '[data-testid="uc-accept-all-button"]',
           },
           {
+            delay: 500,
             selector: "[type=email]",
             input: "m.reuter@telekom.de",
           },
@@ -58,11 +59,25 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   async performInputFillWithRetry(url, interaction) {
     this.logger.info(`Try to fill element ${interaction.selector}`)
 
+    let notFoundCount = 0
+    const maxNotFoundAttempts = 5
+
     for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
-      if (await this.fillInput(url, interaction)) {
+      const result = await this.fillInput(url, interaction)
+
+      if (result === true) {
         this.logger.info(`Filled: ${interaction.selector}`)
         return
       }
+
+      if (result === "not-found") {
+        notFoundCount++
+        if (notFoundCount >= maxNotFoundAttempts) {
+          this.logger.info(`Skipped: element ${interaction.selector} not found after ${maxNotFoundAttempts} attempts`)
+          return
+        }
+      }
+
       await delay(RETRY_TIMEOUT)
     }
   }
@@ -70,78 +85,64 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   async performClickWithRetry(url, interaction) {
     this.logger.info(`Try to click element ${interaction.selector}`)
 
+    let notFoundCount = 0
+    const maxNotFoundAttempts = 5
+
     for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
-      if (await this.clickOn(url, interaction.selector, interaction.index)) {
+      const result = await this.clickOn(url, interaction.selector, interaction.index)
+
+      if (result === true) {
         this.logger.info(`Clicked: ${interaction.selector}`)
         return
       }
+
+      if (result === "not-found") {
+        notFoundCount++
+        if (notFoundCount >= maxNotFoundAttempts) {
+          this.logger.info(`Skipped: element ${interaction.selector} not found after ${maxNotFoundAttempts} attempts`)
+          return
+        }
+      }
+
       await delay(RETRY_TIMEOUT)
     }
   }
 
   async fillInput(url, { selector, input }) {
-    const filled = await this.executeInBrowserContext(
-      "setInputValue",
-      url,
-      selector,
-      input
-    )
+    const result = await this.executeInBrowserContext("setInputValue", url, selector, input)
 
-    if (filled) {
+    if (result === true) {
       this.logger.info(`Filled ${selector} with: ${input.substring(0, 3)}...`)
       return true
     }
 
-    this.logger.info(`Failed to fill ${selector}`)
+    if (result === "not-found") {
+      return "not-found"
+    }
+
     return false
   }
 
   async clickOn(url, selector, index = 0) {
-    const center = await this.executeInBrowserContext(
-      "getElementCenter",
-      url,
-      selector,
-      index
-    )
+    const result = await this.executeInBrowserContext("clickElement", url, selector, index)
 
-    if (center) {
-      this.sendMouseClick(center)
+    if (result === true) {
       return true
     }
 
-    this.logger.info(
-      `clickOn(${url}, ${selector}) did not find element: ${JSON.stringify(center)}`
-    )
-    return false
-  }
-
-  sendMouseClick(centerCoordinates) {
-    const options = {
-      button: "left",
-      x: centerCoordinates[0],
-      y: centerCoordinates[1],
-      clickCount: 1,
-    }
-
-    this.webContents.sendInputEvent({
-      type: "mouseDown",
-      ...options,
-    })
-    this.webContents.sendInputEvent({
-      type: "mouseUp",
-      ...options,
-    })
+    return "not-found"
   }
 
   executeInBrowserContext(functionName, ...functionArguments) {
     const serializedArguments = functionArguments
-      .map(argument => JSON.stringify(argument))
+      .map((argument) => JSON.stringify(argument))
       .join(", ")
 
     const helperFunctions = `
       ${findElementsInDomTree.toString()};
       ${setInputValue.toString()};
       ${getElementCenter.toString()};
+      ${clickElement.toString()};
     `
 
     const javascriptCode = `${helperFunctions}${functionName}(${serializedArguments});`
@@ -160,9 +161,7 @@ function findElementsInDomTree(rootElement, elementSelector) {
   const allElements = rootElement.querySelectorAll("*")
   for (const currentElement of allElements) {
     if (currentElement.shadowRoot) {
-      matchedElements.push(
-        ...findElementsInDomTree(currentElement.shadowRoot, elementSelector)
-      )
+      matchedElements.push(...findElementsInDomTree(currentElement.shadowRoot, elementSelector))
     }
   }
 
@@ -182,7 +181,7 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
       targetElement.dispatchEvent(new Event("change", { bubbles: true }))
       return true
     }
-    return false
+    return "not-found"
   }
 
   const pageIframes = document.getElementsByTagName("iframe")
@@ -191,17 +190,12 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
     try {
       iframeUrl = iframe.contentWindow.location.href.split("?")[0]
     } catch (error) {
-      iframeUrl = iframe.getAttribute("src")
-        ? iframe.getAttribute("src").split("?")[0]
-        : null
+      iframeUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
     }
 
     if (iframeUrl === targetUrl) {
       try {
-        const matchedElements = findElementsInDomTree(
-          iframe.contentDocument,
-          elementSelector
-        )
+        const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
         const targetElement = matchedElements[0]
 
         if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
@@ -215,7 +209,7 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
       }
     }
   }
-  return false
+  return "not-found"
 }
 
 function getElementCenter(
@@ -236,10 +230,7 @@ function getElementCenter(
     const iframeUrl = iframe.getAttribute("src").split("?")[0]
 
     if (iframeUrl === targetUrl) {
-      const matchedElements = findElementsInDomTree(
-        iframe.contentDocument,
-        elementSelector
-      )
+      const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
       const targetElement = matchedElements[elementIndex]
 
       if (targetElement) {
@@ -248,12 +239,52 @@ function getElementCenter(
         const centerY = (top + bottom) / 2 + iframeOffsetFromParent[1]
         return [centerX, centerY]
       } else {
-        return null
+        return "not-found"
       }
     }
   }
 
-  return null
+  return "not-found"
+}
+
+function clickElement(targetUrl, elementSelector, elementIndex) {
+  const currentPageUrl = document.location.href.split("?")[0]
+
+  if (currentPageUrl === targetUrl) {
+    const matchedElements = findElementsInDomTree(document, elementSelector)
+    const targetElement = matchedElements[elementIndex]
+
+    if (targetElement) {
+      targetElement.click()
+      return true
+    }
+    return "not-found"
+  }
+
+  const pageIframes = document.getElementsByTagName("iframe")
+  for (const iframe of pageIframes) {
+    let iframeUrl
+    try {
+      iframeUrl = iframe.contentWindow.location.href.split("?")[0]
+    } catch (error) {
+      iframeUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
+    }
+
+    if (iframeUrl === targetUrl) {
+      try {
+        const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
+        const targetElement = matchedElements[elementIndex]
+
+        if (targetElement) {
+          targetElement.click()
+          return true
+        }
+      } catch (error) {
+        return false
+      }
+    }
+  }
+  return "not-found"
 }
 
 module.exports.loadInteractions = async (configServerUri, queryConfig) => {
