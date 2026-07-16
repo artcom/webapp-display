@@ -6,6 +6,7 @@ const config = require("./options")
 const createMenu = require("./menu")
 const { createWindow } = require("./window")
 const { WebpageInteractor, loadInteractions } = require("./interactions")
+const { loadHttpAuth, installHttpAuthHandler } = require("./httpAuth")
 const { getDeviceEmulationOverrides } = require("./utils")
 
 const SERVICE_ID = "webappDisplay"
@@ -49,6 +50,9 @@ electron.protocol.registerSchemesAsPrivileged([
 
 electron.app.on("ready", async () => {
   const { mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
+
+  const httpAuthCredentials = await loadHttpAuth(queryConfig)
+  installHttpAuthHandler(electron.app, httpAuthCredentials, logger)
 
   config.windows.forEach(
     async ({ deviceSuffix, webAppUrl, bounds, deviceEmulation, displayIndex, alwaysOnTop }) => {
