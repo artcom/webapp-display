@@ -15,27 +15,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     this.webContents.session.webRequest.onCompleted(async (details) => {
       const url = details.url.split("?")[0]
 
-      const testInteractionData = {
-        "https://my.fuerstenberg-institut.de/en/login/": [
-          {
-            selector: '[data-testid="uc-accept-all-button"]',
-          },
-          {
-            delay: 500,
-            selector: "[type=email]",
-            input: "m.reuter@telekom.de",
-          },
-          {
-            selector: "[type=password]",
-            input: "Technologie_02",
-          },
-          {
-            selector: "[type=submit]",
-          },
-        ],
-      }
-
-      const interactions = testInteractionData[url]
+      const interactions = this.interactionData[url]
 
       if (!interactions) return
 
