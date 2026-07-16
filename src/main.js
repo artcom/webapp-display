@@ -6,7 +6,7 @@ const config = require("./options")
 const createMenu = require("./menu")
 const { createWindow } = require("./window")
 const { WebpageInteractor, loadInteractions } = require("./interactions")
-const { loadHttpAuth, installHttpAuthHandler } = require("./httpAuth")
+const { loadHttpAuth, installHttpAuthHandler, installHttpAuthHeaders } = require("./httpAuth")
 const { getDeviceEmulationOverrides } = require("./utils")
 
 const SERVICE_ID = "webappDisplay"
@@ -51,7 +51,7 @@ electron.protocol.registerSchemesAsPrivileged([
 electron.app.on("ready", async () => {
   const { mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
-  const httpAuthCredentials = await loadHttpAuth(queryConfig)
+  const httpAuthCredentials = await loadHttpAuth(queryConfig, config.httpAuth)
   installHttpAuthHandler(electron.app, httpAuthCredentials, logger)
 
   config.windows.forEach(
@@ -92,6 +92,7 @@ electron.app.on("ready", async () => {
         })
 
         electron.Menu.setApplicationMenu(createMenu())
+        installHttpAuthHeaders(window.webContents.session, httpAuthCredentials, logger)
         await createWebpageInteractor(data, queryConfig, window, logger)
 
         mqttClient.subscribe(`${deviceTopic}/doClearCacheAndRestart`, () => {
