@@ -53,6 +53,7 @@ if (cliOptions.inlineConfig || cliOptions.i) {
 
 module.exports = {
   bootstrapUrl: config.bootstrapUrl,
+  httpAuth: config.httpAuth || null,
   logDir: cliOptions.logDir || cliOptions.l || DEFAULT_LOG_DIR,
   windows: config.windows
     ? config.windows.map((windowConfig) => ({ ...DEFAULT_WINDOW_CONFIG, ...windowConfig }))

@@ -125,6 +125,30 @@ examples:
 
 - _delay_ is needed when cookiebanners just appear after a few seconds.
 
+### HTTP Basic/Digest Authentication
+
+Some sites protect access with HTTP authentication, where the browser shows a
+native credential dialog instead of an in-page login form. Because there is no
+DOM to fill, this cannot be handled by the automatic website interactions above.
+Instead, credentials are provided directly to Chromium's `login` event.
+
+Configure them on the config server at `services/webappDisplay/httpAuth` as an
+array of entries, keyed by the requesting host (as reported in the auth
+challenge, including a `:port` suffix if non-standard):
+
+```json
+[
+  {
+    "host": "t-systems.dev-portal.senair.io",
+    "username": "user",
+    "password": "secret"
+  }
+]
+```
+
+When a matching host requests authentication, the credentials are supplied and
+the native dialog is suppressed. Proxy authentication is left untouched.
+
 ## Build
 
 ### Windows with Docker
