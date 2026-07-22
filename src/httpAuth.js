@@ -1,11 +1,8 @@
 const fromPairs = require("lodash.frompairs")
 
-// Loads HTTP (Basic/Digest) auth credentials from the config server.
-// Expected config at `services/webappDisplay/httpAuth`: an array of
-// { host, username, password } entries, where `host` matches authInfo.host
-// (e.g. "t-systems.dev-portal.senair.io" or "example.com:8080").
-const toMap = (entries) =>
-  fromPairs((entries || []).map(({ host, username, password }) => [host, { username, password }]))
+function toMap(entries) {
+  return fromPairs((entries || []).map(({ host, username, password }) => [host, { username, password }]))
+}
 
 module.exports.loadHttpAuth = async (queryConfig, localHttpAuth) => {
   let serverEntries = []
@@ -15,16 +12,9 @@ module.exports.loadHttpAuth = async (queryConfig, localHttpAuth) => {
     /* ignore - no http auth configured on the config server */
   }
 
-  // Local config (config.json) overrides the config server, for local testing.
   return { ...toMap(serverEntries), ...toMap(localHttpAuth) }
 }
 
-// Preemptively attaches an `Authorization: Basic` header to every request
-// whose host has configured credentials. This mirrors how a browser replays
-// cached credentials after a single login, and avoids the 401/retry cycle
-// that Electron's `login` event can trigger for XHR/fetch subresources
-// (net::ERR_TOO_MANY_RETRIES). Basic auth only - Digest still relies on the
-// `login` handler below, since it needs the server's challenge nonce.
 module.exports.installHttpAuthHeaders = (session, credentialsByHost, logger) => {
   const basicHeaderByHost = {}
   Object.entries(credentialsByHost).forEach(([host, { username, password }]) => {
@@ -51,16 +41,10 @@ module.exports.installHttpAuthHeaders = (session, credentialsByHost, logger) => 
   })
 }
 
-// Installs an app-level handler that answers Chromium's native HTTP auth
-// prompt with configured credentials instead of showing the dialog.
 module.exports.installHttpAuthHandler = (electronApp, credentialsByHost, logger) => {
-  // Tracks requests we have already answered. If the same request challenges
-  // us again, the credentials were rejected - so we give up instead of
-  // re-sending them, which would loop until net::ERR_TOO_MANY_RETRIES.
   const answered = new Set()
 
   electronApp.on("login", (event, webContents, details, authInfo, callback) => {
-    // Let proxy authentication fall through to the default behaviour.
     if (authInfo.isProxy) {
       return
     }
@@ -73,7 +57,6 @@ module.exports.installHttpAuthHandler = (electronApp, credentialsByHost, logger)
 
     const key = `${details.url} ${authInfo.realm}`
     if (answered.has(key)) {
-      // We already tried these credentials for this request and were rejected.
       answered.delete(key)
       logger.warn(
         `HTTP auth credentials rejected for "${authInfo.host}" (realm "${authInfo.realm}", ${details.url}) - not retrying`
