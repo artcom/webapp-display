@@ -19,7 +19,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       const interactions = this.interactionData[url]
       if (!interactions) return
 
-      await delay(1000)
+      await delay(500)
 
       let iframeUrl = null
       try {
