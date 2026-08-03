@@ -28,6 +28,14 @@ electron.app.commandLine.appendSwitch(
 
 electron.app.commandLine.appendSwitch("disable-site-isolation-trials")
 
+// Some sites sniff the user agent and refuse to render for anything they do not
+// recognise as a supported desktop browser (Motorola WebDispatcher, for example,
+// shows "Browser not supported"). Dropping the `Electron/<version>` token leaves
+// an ordinary Chrome UA and is enough to pass those checks. The
+// `webapp-display/<version>` token is kept so devices stay identifiable.
+const defaultUserAgent = electron.app.userAgentFallback
+electron.app.userAgentFallback = defaultUserAgent.replace(/Electron\/[\d.]+\s*/, "")
+
 if (process.platform === "darwin") {
   electron.systemPreferences.askForMediaAccess("camera")
   electron.systemPreferences.askForMediaAccess("microphone")
@@ -49,6 +57,8 @@ electron.protocol.registerSchemesAsPrivileged([
 ])
 
 electron.app.on("ready", async () => {
+  logger.info(`User agent: ${electron.app.userAgentFallback} (was: ${defaultUserAgent})`)
+
   const { mqttClient, queryConfig, data } = await bootstrap(config.bootstrapUrl, SERVICE_ID)
 
   const httpAuthCredentials = await loadHttpAuth(queryConfig, config.httpAuth)
