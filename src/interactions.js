@@ -300,7 +300,7 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
 module.exports.loadInteractions = async (configServerUri, queryConfig) => {
   try {
     const data = await queryConfig(`services/webappDisplay/interactions`)
-    return fromPairs(data.map(({ url, interactions }) => [url, interactions]))
+    return fromPairs(data.map(({ url, interactions }) => [url.replace(/\/$/, ""), interactions]))
   } catch (error) {
     /* ignore */
   }
