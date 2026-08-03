@@ -12,15 +12,11 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   }
 
   async listen() {
-    this.logger.info("Interaction listener started")
     this.webContents.session.webRequest.onCompleted(async (details) => {
       let url = details.url.split("?")[0]
       url = url.replace(/\/$/, "")
-      this.logger.info(`Request: ${url}`)
 
       const interactions = this.interactionData[url]
-      this.logger.info(`Interactions found for ${url}: ${!!interactions}`)
-
       if (!interactions) return
 
       await delay(1000)
@@ -32,10 +28,9 @@ module.exports.WebpageInteractor = class WebpageInteractor {
           iframe ? iframe.contentWindow.location.href.split('?')[0] : null
         `)
       } catch (e) {
-        this.logger.info(`Error getting iframe URL: ${e.message}`)
+        // ignore
       }
 
-      this.logger.info(`Iframe URL: ${iframeUrl}, using target: ${iframeUrl || url}`)
       const targetUrl = iframeUrl || url
 
       try {
@@ -305,9 +300,8 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
 module.exports.loadInteractions = async (configServerUri, queryConfig) => {
   try {
     const data = await queryConfig(`services/webappDisplay/interactions`)
-    console.log(`Loaded interactions data:`, data)
     return fromPairs(data.map(({ url, interactions }) => [url, interactions]))
   } catch (error) {
-    console.error(`Failed to load interactions:`, error)
+    /* ignore */
   }
 }
