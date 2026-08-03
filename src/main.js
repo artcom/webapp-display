@@ -152,8 +152,11 @@ electron.app.on("window-all-closed", () => {
 })
 
 async function createWebpageInteractor(data, queryConfig, window, logger) {
+  logger.info("Creating WebpageInteractor...")
   const interactionData = await loadInteractions(data.configServerUri, queryConfig)
+  logger.info(`Loaded interaction data:`, interactionData)
   const webpageInteractor = new WebpageInteractor(window.webContents, interactionData, logger)
+  logger.info("WebpageInteractor created, calling listen()...")
   webpageInteractor.listen()
 }
 

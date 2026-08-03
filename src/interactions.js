@@ -12,21 +12,40 @@ module.exports.WebpageInteractor = class WebpageInteractor {
   }
 
   async listen() {
+    this.logger.info("Interaction listener started")
     this.webContents.session.webRequest.onCompleted(async (details) => {
-      const url = details.url.split("?")[0]
+      let url = details.url.split("?")[0]
+      url = url.replace(/\/$/, "")
+      this.logger.info(`Request: ${url}`)
 
       const interactions = this.interactionData[url]
+      this.logger.info(`Interactions found for ${url}: ${!!interactions}`)
 
       if (!interactions) return
+
+      await delay(1000)
+
+      let iframeUrl = null
+      try {
+        iframeUrl = await this.webContents.executeJavaScript(`
+          const iframe = document.querySelector("iframe")
+          iframe ? iframe.contentWindow.location.href.split('?')[0] : null
+        `)
+      } catch (e) {
+        this.logger.info(`Error getting iframe URL: ${e.message}`)
+      }
+
+      this.logger.info(`Iframe URL: ${iframeUrl}, using target: ${iframeUrl || url}`)
+      const targetUrl = iframeUrl || url
 
       try {
         for (const interaction of interactions) {
           await delay(interaction.delay || 0)
 
           if (interaction.input) {
-            await this.performInputFillWithRetry(url, interaction)
+            await this.performInputFillWithRetry(targetUrl, interaction)
           } else {
-            await this.performClickWithRetry(url, interaction)
+            await this.performClickWithRetry(targetUrl, interaction)
           }
         }
         this.logger.info(`Did all interactions`)
@@ -53,7 +72,9 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       if (result === "not-found") {
         notFoundCount++
         if (notFoundCount >= maxNotFoundAttempts) {
-          this.logger.info(`Skipped: element ${interaction.selector} not found after ${maxNotFoundAttempts} attempts`)
+          this.logger.info(
+            `Skipped: element ${interaction.selector} not found after ${maxNotFoundAttempts} attempts`
+          )
           return
         }
       }
@@ -79,7 +100,9 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       if (result === "not-found") {
         notFoundCount++
         if (notFoundCount >= maxNotFoundAttempts) {
-          this.logger.info(`Skipped: element ${interaction.selector} not found after ${maxNotFoundAttempts} attempts`)
+          this.logger.info(
+            `Skipped: element ${interaction.selector} not found after ${maxNotFoundAttempts} attempts`
+          )
           return
         }
       }
@@ -165,6 +188,8 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
   }
 
   const pageIframes = document.getElementsByTagName("iframe")
+  console.log(`Looking for iframe with URL: ${targetUrl}, found ${pageIframes.length} iframes`)
+
   for (const iframe of pageIframes) {
     let iframeUrl
     try {
@@ -173,9 +198,12 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
       iframeUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
     }
 
+    console.log(`Iframe URL: ${iframeUrl}, matches target: ${iframeUrl === targetUrl}`)
+
     if (iframeUrl === targetUrl) {
       try {
         const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
+        console.log(`Found ${matchedElements.length} elements matching ${elementSelector}`)
         const targetElement = matchedElements[0]
 
         if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
@@ -185,6 +213,7 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
           return true
         }
       } catch (error) {
+        console.log(`Error accessing iframe: ${error.message}`)
         return false
       }
     }
@@ -242,6 +271,8 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
   }
 
   const pageIframes = document.getElementsByTagName("iframe")
+  console.log(`Looking for iframe with URL: ${targetUrl}, found ${pageIframes.length} iframes`)
+
   for (const iframe of pageIframes) {
     let iframeUrl
     try {
@@ -250,9 +281,12 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
       iframeUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
     }
 
+    console.log(`Iframe URL: ${iframeUrl}, matches target: ${iframeUrl === targetUrl}`)
+
     if (iframeUrl === targetUrl) {
       try {
         const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
+        console.log(`Found ${matchedElements.length} elements matching ${elementSelector}`)
         const targetElement = matchedElements[elementIndex]
 
         if (targetElement) {
@@ -260,6 +294,7 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
           return true
         }
       } catch (error) {
+        console.log(`Error accessing iframe: ${error.message}`)
         return false
       }
     }
@@ -270,9 +305,9 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
 module.exports.loadInteractions = async (configServerUri, queryConfig) => {
   try {
     const data = await queryConfig(`services/webappDisplay/interactions`)
-
+    console.log(`Loaded interactions data:`, data)
     return fromPairs(data.map(({ url, interactions }) => [url, interactions]))
   } catch (error) {
-    /* ignore */
+    console.error(`Failed to load interactions:`, error)
   }
 }
