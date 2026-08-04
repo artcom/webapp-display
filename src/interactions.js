@@ -183,7 +183,6 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
   }
 
   const pageIframes = document.getElementsByTagName("iframe")
-  console.log(`Looking for iframe with URL: ${targetUrl}, found ${pageIframes.length} iframes`)
 
   for (const iframe of pageIframes) {
     let iframeUrl
@@ -193,12 +192,9 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
       iframeUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
     }
 
-    console.log(`Iframe URL: ${iframeUrl}, matches target: ${iframeUrl === targetUrl}`)
-
     if (iframeUrl === targetUrl) {
       try {
         const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
-        console.log(`Found ${matchedElements.length} elements matching ${elementSelector}`)
         const targetElement = matchedElements[0]
 
         if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
@@ -208,7 +204,6 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
           return true
         }
       } catch (error) {
-        console.log(`Error accessing iframe: ${error.message}`)
         return false
       }
     }
@@ -266,7 +261,6 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
   }
 
   const pageIframes = document.getElementsByTagName("iframe")
-  console.log(`Looking for iframe with URL: ${targetUrl}, found ${pageIframes.length} iframes`)
 
   for (const iframe of pageIframes) {
     let iframeUrl
@@ -276,12 +270,9 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
       iframeUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
     }
 
-    console.log(`Iframe URL: ${iframeUrl}, matches target: ${iframeUrl === targetUrl}`)
-
     if (iframeUrl === targetUrl) {
       try {
         const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
-        console.log(`Found ${matchedElements.length} elements matching ${elementSelector}`)
         const targetElement = matchedElements[elementIndex]
 
         if (targetElement) {
@@ -289,7 +280,6 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
           return true
         }
       } catch (error) {
-        console.log(`Error accessing iframe: ${error.message}`)
         return false
       }
     }
