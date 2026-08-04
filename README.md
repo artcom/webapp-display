@@ -139,7 +139,7 @@ challenge, including a `:port` suffix if non-standard):
 ```json
 [
   {
-    "host": "t-systems.dev-portal.senair.io",
+    "host": "my.host.address",
     "username": "user",
     "password": "secret"
   }
