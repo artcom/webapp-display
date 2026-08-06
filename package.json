@@ -46,10 +46,10 @@
     }
   },
   "engines": {
-    "node": "22.6.0"
+    "node": "26.3.0"
   },
   "dependencies": {
-    "@artcom/bootstrap-client": "^4.6.0",
+    "@artcom/bootstrap-client": "^5.0.1",
     "@artcom/logger": "^1.6.0",
     "@electron-toolkit/utils": "^3.0.0",
     "lodash.frompairs": "^4.0.1",
