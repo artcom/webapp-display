@@ -13,25 +13,29 @@ module.exports.WebpageInteractor = class WebpageInteractor {
 
   async listen() {
     this.webContents.session.webRequest.onCompleted(async (details) => {
-      let url = details.url.split("?")[0]
-      url = url.replace(/\/$/, "")
+      const url = normalizeUrl(details.url)
 
       const interactions = this.interactionData[url]
       if (!interactions) return
 
       await delay(500)
 
-      let iframeUrl = null
+      // The page may have routed on client side since the request that triggered this
+      // (fuerstenberg redirects to /login), so match against the live url, not the request.
+      let liveUrl = null
       try {
-        iframeUrl = await this.webContents.executeJavaScript(`
-          const iframe = document.querySelector("iframe")
-          iframe ? iframe.contentWindow.location.href.split('?')[0] : null
+        liveUrl = await this.webContents.executeJavaScript(`
+          (() => {
+            const iframe = document.querySelector("iframe")
+            return iframe ? iframe.contentWindow.location.href : document.location.href
+          })()
         `)
-      } catch (e) {
-        // ignore
+      } catch (error) {
+        // cross-origin iframe or no page yet - fall back to the request url
       }
 
-      const targetUrl = iframeUrl || url
+      const targetUrl = normalizeUrl(liveUrl) || url
+      this.logger.info(`Interactions for ${url} (target: ${targetUrl})`)
 
       try {
         for (const interaction of interactions) {
@@ -137,6 +141,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       .join(", ")
 
     const helperFunctions = `
+      ${normalizeUrl.toString()};
       ${findElementsInDomTree.toString()};
       ${setInputValue.toString()};
       ${getElementCenter.toString()};
@@ -166,8 +171,12 @@ function findElementsInDomTree(rootElement, elementSelector) {
   return matchedElements
 }
 
+function normalizeUrl(url) {
+  return url ? url.split("?")[0].replace(/\/$/, "") : null
+}
+
 function setInputValue(targetUrl, elementSelector, inputValue) {
-  const currentPageUrl = document.location.href.split("?")[0]
+  const currentPageUrl = normalizeUrl(document.location.href)
 
   if (currentPageUrl === targetUrl) {
     const matchedElements = findElementsInDomTree(document, elementSelector)
@@ -187,9 +196,9 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
   for (const iframe of pageIframes) {
     let iframeUrl
     try {
-      iframeUrl = iframe.contentWindow.location.href.split("?")[0]
+      iframeUrl = normalizeUrl(iframe.contentWindow.location.href)
     } catch (error) {
-      iframeUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
+      iframeUrl = normalizeUrl(iframe.getAttribute("src"))
     }
 
     if (iframeUrl === targetUrl) {
@@ -226,7 +235,7 @@ function getElementCenter(
       parentOffset[1] + iframe.getBoundingClientRect().top,
     ]
 
-    const iframeUrl = iframe.getAttribute("src").split("?")[0]
+    const iframeUrl = normalizeUrl(iframe.getAttribute("src"))
 
     if (iframeUrl === targetUrl) {
       const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
@@ -247,7 +256,7 @@ function getElementCenter(
 }
 
 function clickElement(targetUrl, elementSelector, elementIndex) {
-  const currentPageUrl = document.location.href.split("?")[0]
+  const currentPageUrl = normalizeUrl(document.location.href)
 
   if (currentPageUrl === targetUrl) {
     const matchedElements = findElementsInDomTree(document, elementSelector)
@@ -265,9 +274,9 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
   for (const iframe of pageIframes) {
     let iframeUrl
     try {
-      iframeUrl = iframe.contentWindow.location.href.split("?")[0]
+      iframeUrl = normalizeUrl(iframe.contentWindow.location.href)
     } catch (error) {
-      iframeUrl = iframe.getAttribute("src") ? iframe.getAttribute("src").split("?")[0] : null
+      iframeUrl = normalizeUrl(iframe.getAttribute("src"))
     }
 
     if (iframeUrl === targetUrl) {
@@ -290,7 +299,7 @@ function clickElement(targetUrl, elementSelector, elementIndex) {
 module.exports.loadInteractions = async (configServerUri, queryConfig) => {
   try {
     const data = await queryConfig(`services/webappDisplay/interactions`)
-    return fromPairs(data.map(({ url, interactions }) => [url.replace(/\/$/, ""), interactions]))
+    return fromPairs(data.map(({ url, interactions }) => [normalizeUrl(url), interactions]))
   } catch (error) {
     /* ignore */
   }
