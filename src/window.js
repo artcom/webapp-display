@@ -37,6 +37,12 @@ module.exports.createWindow = ({
     webPreferences: {
       session,
       webviewTag: true,
+      // Chromium throttles timers of windows it considers invisible to a one second
+      // grid. That makes the MQTT keepalive of the webApp miss the broker deadline, so
+      // the connection is dropped and re-established every few seconds - and any
+      // command published into such a gap is lost. Players run fullscreen and visible,
+      // but a windowed display on a developer machine sits behind other windows.
+      backgroundThrottling: false,
       preload: path.join(electron.app.getAppPath(), "src", "preload.js"),
       webSecurity: false,
       contextIsolation: false,
