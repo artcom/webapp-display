@@ -143,9 +143,9 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     const helperFunctions = `
       ${normalizeUrl.toString()};
       ${findElementsInDomTree.toString()};
+      ${findDocumentForUrl.toString()};
       ${setNativeValue.toString()};
       ${setInputValue.toString()};
-      ${getElementCenter.toString()};
       ${clickElement.toString()};
     `
 
@@ -184,23 +184,12 @@ function setNativeValue(element, value) {
   element.dispatchEvent(new Event("change", { bubbles: true }))
 }
 
-function setInputValue(targetUrl, elementSelector, inputValue) {
-  const currentPageUrl = normalizeUrl(document.location.href)
-
-  if (currentPageUrl === targetUrl) {
-    const matchedElements = findElementsInDomTree(document, elementSelector)
-    const targetElement = matchedElements[0]
-
-    if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
-      setNativeValue(targetElement, inputValue)
-      return true
-    }
-    return "not-found"
+function findDocumentForUrl(targetUrl) {
+  if (normalizeUrl(document.location.href) === targetUrl) {
+    return document
   }
 
-  const pageIframes = document.getElementsByTagName("iframe")
-
-  for (const iframe of pageIframes) {
+  for (const iframe of document.getElementsByTagName("iframe")) {
     let iframeUrl
     try {
       iframeUrl = normalizeUrl(iframe.contentWindow.location.href)
@@ -209,96 +198,41 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
     }
 
     if (iframeUrl === targetUrl) {
-      try {
-        const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
-        const targetElement = matchedElements[0]
-
-        if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
-          setNativeValue(targetElement, inputValue)
-          return true
-        }
-      } catch (error) {
-        return false
-      }
+      return iframe.contentDocument
     }
   }
-  return "not-found"
+
+  return null
 }
 
-function getElementCenter(
-  targetUrl,
-  elementSelector,
-  elementIndex,
-  rootElement = document,
-  parentOffset = [0, 0]
-) {
-  const pageIframes = rootElement.getElementsByTagName("iframe")
-
-  for (const iframe of pageIframes) {
-    const iframeOffsetFromParent = [
-      parentOffset[0] + iframe.getBoundingClientRect().left,
-      parentOffset[1] + iframe.getBoundingClientRect().top,
-    ]
-
-    const iframeUrl = normalizeUrl(iframe.getAttribute("src"))
-
-    if (iframeUrl === targetUrl) {
-      const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
-      const targetElement = matchedElements[elementIndex]
-
-      if (targetElement) {
-        const { left, right, top, bottom } = targetElement.getBoundingClientRect()
-        const centerX = (left + right) / 2 + iframeOffsetFromParent[0]
-        const centerY = (top + bottom) / 2 + iframeOffsetFromParent[1]
-        return [centerX, centerY]
-      } else {
-        return "not-found"
-      }
-    }
+function setInputValue(targetUrl, elementSelector, inputValue) {
+  const targetDocument = findDocumentForUrl(targetUrl)
+  if (!targetDocument) {
+    return "not-found"
   }
 
-  return "not-found"
+  const targetElement = findElementsInDomTree(targetDocument, elementSelector)[0]
+  if (!targetElement || !targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
+    return "not-found"
+  }
+
+  setNativeValue(targetElement, inputValue)
+  return true
 }
 
 function clickElement(targetUrl, elementSelector, elementIndex) {
-  const currentPageUrl = normalizeUrl(document.location.href)
-
-  if (currentPageUrl === targetUrl) {
-    const matchedElements = findElementsInDomTree(document, elementSelector)
-    const targetElement = matchedElements[elementIndex]
-
-    if (targetElement) {
-      targetElement.click()
-      return true
-    }
+  const targetDocument = findDocumentForUrl(targetUrl)
+  if (!targetDocument) {
     return "not-found"
   }
 
-  const pageIframes = document.getElementsByTagName("iframe")
-
-  for (const iframe of pageIframes) {
-    let iframeUrl
-    try {
-      iframeUrl = normalizeUrl(iframe.contentWindow.location.href)
-    } catch (error) {
-      iframeUrl = normalizeUrl(iframe.getAttribute("src"))
-    }
-
-    if (iframeUrl === targetUrl) {
-      try {
-        const matchedElements = findElementsInDomTree(iframe.contentDocument, elementSelector)
-        const targetElement = matchedElements[elementIndex]
-
-        if (targetElement) {
-          targetElement.click()
-          return true
-        }
-      } catch (error) {
-        return false
-      }
-    }
+  const targetElement = findElementsInDomTree(targetDocument, elementSelector)[elementIndex]
+  if (!targetElement) {
+    return "not-found"
   }
-  return "not-found"
+
+  targetElement.click()
+  return true
 }
 
 module.exports.loadInteractions = async (configServerUri, queryConfig) => {
