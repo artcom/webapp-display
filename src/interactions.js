@@ -143,6 +143,7 @@ module.exports.WebpageInteractor = class WebpageInteractor {
     const helperFunctions = `
       ${normalizeUrl.toString()};
       ${findElementsInDomTree.toString()};
+      ${setNativeValue.toString()};
       ${setInputValue.toString()};
       ${getElementCenter.toString()};
       ${clickElement.toString()};
@@ -175,6 +176,14 @@ function normalizeUrl(url) {
   return url ? url.split("?")[0].replace(/\/$/, "") : null
 }
 
+function setNativeValue(element, value) {
+  const { set } = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), "value")
+  set.call(element, value)
+
+  element.dispatchEvent(new Event("input", { bubbles: true }))
+  element.dispatchEvent(new Event("change", { bubbles: true }))
+}
+
 function setInputValue(targetUrl, elementSelector, inputValue) {
   const currentPageUrl = normalizeUrl(document.location.href)
 
@@ -183,9 +192,7 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
     const targetElement = matchedElements[0]
 
     if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
-      targetElement.value = inputValue
-      targetElement.dispatchEvent(new Event("input", { bubbles: true }))
-      targetElement.dispatchEvent(new Event("change", { bubbles: true }))
+      setNativeValue(targetElement, inputValue)
       return true
     }
     return "not-found"
@@ -207,9 +214,7 @@ function setInputValue(targetUrl, elementSelector, inputValue) {
         const targetElement = matchedElements[0]
 
         if (targetElement && targetElement.tagName.match(/INPUT|TEXTAREA/i)) {
-          targetElement.value = inputValue
-          targetElement.dispatchEvent(new Event("input", { bubbles: true }))
-          targetElement.dispatchEvent(new Event("change", { bubbles: true }))
+          setNativeValue(targetElement, inputValue)
           return true
         }
       } catch (error) {
