@@ -20,8 +20,6 @@ module.exports.WebpageInteractor = class WebpageInteractor {
 
       await delay(500)
 
-      // The page may have routed on client side since the request that triggered this
-      // (fuerstenberg redirects to /login), so match against the live url, not the request.
       let liveUrl = null
       try {
         liveUrl = await this.webContents.executeJavaScript(`
