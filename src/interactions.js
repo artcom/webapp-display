@@ -24,12 +24,25 @@ module.exports.WebpageInteractor = class WebpageInteractor {
       try {
         liveUrl = await this.webContents.executeJavaScript(`
           (() => {
-            const iframe = document.querySelector("iframe")
-            return iframe ? iframe.contentWindow.location.href : document.location.href
+            const origin = new URL(${JSON.stringify(url)}).origin
+            const iframes = Array.from(document.querySelectorAll("iframe"))
+            const windows = [window, ...iframes.map((iframe) => iframe.contentWindow)]
+
+            for (const candidate of windows) {
+              try {
+                if (new URL(candidate.location.href).origin === origin) {
+                  return candidate.location.href
+                }
+              } catch (error) {
+                /* not readable */
+              }
+            }
+
+            return null
           })()
         `)
       } catch (error) {
-        // cross-origin iframe or no page yet - fall back to the request url
+        /* ignore */
       }
 
       const targetUrl = normalizeUrl(liveUrl) || url
