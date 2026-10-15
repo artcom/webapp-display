@@ -19,6 +19,12 @@ electron.app.commandLine.appendSwitch("ignore-autoplay-restrictions")
 electron.app.commandLine.appendSwitch("no-user-gesture-required")
 electron.app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
 
+// enable remote debugging only when a CDP port is configured
+if (config.cdpPort) {
+  logger.info(`Remote debugging enabled on port ${config.cdpPort}`)
+  electron.app.commandLine.appendSwitch("remote-debugging-port", String(config.cdpPort))
+}
+
 electron.app.commandLine.appendSwitch("touch-events", "enabled")
 electron.app.commandLine.appendSwitch("enable-features", "OverlayScrollbar")
 electron.app.commandLine.appendSwitch(
